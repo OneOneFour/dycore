@@ -1,0 +1,45 @@
+"Diagnostics from spectral barotropic model"
+0 0 0 0 0 0
+
+"barotropic", 1, "days",  1, "days", "time",
+
+"barotropic_diagnostics",  "ucomp" ,  "ucomp" ,  "barotropic",  "all", .false.,  "none", 2,
+"barotropic_diagnostics",  "vcomp" ,  "vcomp" ,  "barotropic",  "all", .false.,  "none", 2,
+"barotropic_diagnostics",  "vor"   ,  "vor"   ,  "barotropic",  "all", .false.,  "none", 2,
+"barotropic_diagnostics",  "pv"    ,  "pv"    ,  "barotropic",  "all", .false.,  "none", 2,
+"barotropic_diagnostics",  "stream",  "stream",  "barotropic",  "all", .false.,  "none", 2,
+"barotropic_diagnostics",  "trs"   ,  "trs"   ,  "barotropic",  "all", .false.,  "none", 2,
+"barotropic_diagnostics",  "tr"    ,  "tr"    ,  "barotropic",  "all", .false.,  "none", 2,
+
+=============================================================================================
+
+  FORMATS FOR FILE ENTRIES (not all input values are used)
+  ------------------------
+
+"file_name", output_freq, "output_units", format, "time_units", "long_name",
+
+
+output_freq:  > 0  output frequency in "output_units"
+              = 0  output frequency every time step
+              =-1  output frequency at end of run
+
+output_units = units used for output frequency
+               (years, months, days, minutes, hours, seconds)
+
+time_units   = units used to label the time axis
+               (days, minutes, hours, seconds)
+
+
+  FORMAT FOR FIELD ENTRIES (not all input values are used)
+  ------------------------
+
+"module_name", "field_name", "output_name", "file_name" "time_sampling", time_avg, "other_opts", packing
+
+time_avg = .true. or .false.
+
+packing  = 1  double precision
+         = 2  float
+         = 4  packed 16-bit integers
+         = 8  packed 1-byte (not tested?)
+
+

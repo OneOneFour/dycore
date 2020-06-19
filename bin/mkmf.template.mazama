@@ -1,0 +1,42 @@
+# template for the Intel fortran compiler
+# typical use with mkmf
+# mkmf -t template.ifc -c"-Duse_libMPI -Duse_netCDF" path_names /usr/local/include
+
+#NETCDF_INCLUDE= /share/cees/software/netcdf/intel19-openmpi4/include
+#NETCDF_LIB= /share/cees/software/netcdf/intel19-openmpi4/lib64
+
+#FC = mpifort
+#
+#
+# this should be consistent for both gnu and intel compiler conventions
+# let's try to use the env. variables. also, do we need to substitute the mpicc for cc (in most cases?)? this will
+#  break the mppccombine program...
+#FC = ${MPIFC}
+#CC = ${MPICC}
+#LD = ${FC}
+#FC = mpifort
+#
+CC_spp = ${CC}
+CC = mpicc
+CXX = mpicxx
+MPICC=mpicc
+#
+# for impi:
+FC = mpiifort
+MPIFC = mpiifort
+LD = mpiifort
+# else:
+#FC = mpifort
+#MPIFC = mpifort
+#LD = mpifort
+#
+#FFLAGS = -i4 -r8 -fpp -O2 -I/share/cees/software/netcdf/intel19-openmpi4/include
+FFLAGS = -i4 -r8 -fpp -O2 -I${NETCDF_INC} -I${NETCDF_FORTRAN_INC} -I${HDF5_INC} -I${UDUNITS_INC}
+#
+#
+# FFLAGS = -i4 -r8 -fpp -g #debugging
+# LIBS needs to be customized for your site
+LIBS = -L${NETCDF_LIB} -L${NETCDF_FORTRAN_LIB} -lnetcdff -lnetcdf -L${UDUNITS_LIB} -ludunits2 -L${HDF5_LIB}
+LDFLAGS = $(LIBS)
+#
+CFLAGS = -D__IFC

@@ -1,0 +1,86 @@
+#!/bin/bash
+#
+#SBATCH --job-name=dycore
+#SBATCH --ntasks=8
+#SBATCH --partition=twohour
+#SBATCH --output=outfile.%j.out
+#SBATCH --error=outfile.%j.err
+#
+###SBATCH --ntasks-per-node=8
+#
+module purge
+module load intel/19
+COMP="intel19"
+module load openmpi_3/3.1.4
+MPI="openmpi3"
+#module load mpich_3/
+#module load impi_19/
+#
+module load dycore/
+#
+# How to run a job...
+echo "Write an input script, copy"
+WORK_DIR="`cd ..;pwd`/workdir_run2_${COMP}_${MPI}"
+echo "WORK_DIR: ${WORK_DIR}"
+#exit 1
+#
+NAME_LIST=${DYCORE_DIR}/input/spectral_namelist
+DIAG_TABLE=${DYCORE_DIR}/input/hs_diag_table
+FIELD_TABLE=${DYCORE_DIR}/input/spectral_field_table
+#
+# this appears to be failing... or more specifically, the condition always succeeds. SLURM_NTASKS exists,
+#  is blankk, but not empty or blank. don't know...
+if [[ -z ${SLURM_NTASKS} ]]; then
+    npes=${SLURM_NTASKS}
+else
+    npes=8
+fi
+if [[ -z ${npes} ]]; then npes=6; fi
+#
+# careful!!!
+if [[ -d ${WORK_DIR} ]]; then rm -rf ${WORK_DIR}; fi
+#
+if [[ ! -d ${WORK_DIR} ]]; then mkdir -p ${WORK_DIR}; fi
+mkdir ${WORK_DIR}/INPUT
+mkdir ${WORK_DIR}/RESTART
+#
+#
+#--------------------------------------------------
+# Construct the necessary inputs; put them into ${WORK_DIR}
+cd ${WORK_DIR}
+# create an input.nml file and ...
+# set run length and time step, get input data and executable
+cat > input.nml << EOF
+ &main_nml
+     days   = 100,
+     dt_atmos = 600 /
+EOF
+#
+# now, pull configuration data from the DyCore source into the input:
+cat ${NAME_LIST} >> input.nml
+cp ${DIAG_TABLE} diag_table
+cp ${FIELD_TABLE} field_table
+#
+#
+#exit 1
+echo "now create and submit a batch script: "
+pwd
+
+if [[ -f submit.sh ]]; then
+    rm -f submit.sh
+fi
+#
+#if [[ ! -d ${WORK_DIR}/INPUT ]]; then mkdir -p ${WORK_DIR}/INPUT; fi
+#if [[ ! -d ${WORK_DIR}/RESTART ]]; then  mkdir -p ${WORK_DIR}/RESTART; fi
+ulimit -s unlimited
+
+mpirun -np ${npes} fms.x
+#
+# combine netcdf files
+if [[ ${npes} -gt 1 ]]; then
+  for ncfile in \$( ls *.nc.0000 )
+  do
+    \${MPPNCCOMBINE}  -v -r \$ncfile
+  done
+fi
+#
