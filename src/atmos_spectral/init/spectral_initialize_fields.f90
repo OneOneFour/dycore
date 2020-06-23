@@ -30,6 +30,8 @@ use        constants_mod, only: rdgas
 
 use       transforms_mod, only: trans_grid_to_spherical, trans_spherical_to_grid, vor_div_from_uv_grid, &
                                 uv_grid_from_vor_div, get_grid_domain, get_spec_domain, area_weighted_global_mean
+! yoder:
+use    mpp_mod, only : stdout
 
 implicit none
 private
@@ -47,14 +49,16 @@ logical :: entry_to_logfile_done = .false.
 contains
 
 !-------------------------------------------------------------------------------------------------
+!
+! yoder: adding initial_perturbation call...
 subroutine spectral_initialize_fields(reference_sea_level_press, triang_trunc, choice_of_init, initial_temperature, &
-                        surf_geopotential, ln_ps, vors, divs, ts, psg, ug, vg, tg, vorg, divg)
+                        surf_geopotential, ln_ps, vors, divs, ts, psg, ug, vg, tg, vorg, divg, initial_perturbation)
 
 real,    intent(in) :: reference_sea_level_press
 logical, intent(in) :: triang_trunc
 integer, intent(in) :: choice_of_init
 real,    intent(in) :: initial_temperature
-
+!
 real,    intent(in),  dimension(:,:    ) :: surf_geopotential
 complex, intent(out), dimension(:,:    ) :: ln_ps
 complex, intent(out), dimension(:,:,:  ) :: vors, divs, ts
@@ -65,9 +69,14 @@ real,    intent(out), dimension(:,:,:  ) :: vorg, divg
 real, allocatable, dimension(:,:) :: ln_psg
 
 real :: initial_sea_level_press, global_mean_psg
-real :: initial_perturbation   = 2.e-7
-
+!yoder:
+real,    intent(in) :: initial_perturbation
+!real :: initial_perturbation   = 2.e-7
 integer :: ms, me, ns, ne, is, ie, js, je, num_levels
+
+!initial_perturbation   = 2.e-7
+!write (stdout(), *) '*** DEBUG: initial_perturbation: ', initial_perturbation, initial_temperature, initial_perturbation*10.
+!write (stdout(),*) trim(warn_header), 'Invalid list pointer'
 
 if(.not.entry_to_logfile_done) then
   call write_version_number(version, tagname)

@@ -31,7 +31,7 @@ spectral_damping.o: /scratch/myoder96/dycore/src/atmos_spectral/model/spectral_d
 	$(FC) $(FFLAGS) -c	/scratch/myoder96/dycore/src/atmos_spectral/model/spectral_damping.f90
 horiz_interp.o: /scratch/myoder96/dycore/src/shared/horiz_interp/horiz_interp.f90 fms.o mpp.o constants.o
 	$(FC) $(FFLAGS) -c	/scratch/myoder96/dycore/src/shared/horiz_interp/horiz_interp.f90
-spectral_initialize_fields.o: /scratch/myoder96/dycore/src/atmos_spectral/init/spectral_initialize_fields.f90 fms.o constants.o transforms.o
+spectral_initialize_fields.o: /scratch/myoder96/dycore/src/atmos_spectral/init/spectral_initialize_fields.f90 fms.o constants.o transforms.o mpp.o
 	$(FC) $(FFLAGS) -c	/scratch/myoder96/dycore/src/atmos_spectral/init/spectral_initialize_fields.f90
 fft.o: /scratch/myoder96/dycore/src/shared/fft/fft.F90 platform.o fms.o fft99.o
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FFLAGS) -c	/scratch/myoder96/dycore/src/shared/fft/fft.F90
