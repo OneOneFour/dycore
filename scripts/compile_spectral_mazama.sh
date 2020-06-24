@@ -8,9 +8,9 @@ module load intel/19
 COMP="intel19"
 PREREQ_COMP="intel/19.1.0.166"
 #
-module load openmpi_3/3.1.4
-MPI="openmpi3"
-PREREQ_MPI="openmpi3/3.1.4"
+#module load openmpi_3/3.1.4
+#MPI="openmpi3"
+#PREREQ_MPI="openmpi3/3.1.4"
 #
 #module load mpich_3/
 #MPI="mpich3"
@@ -18,9 +18,9 @@ PREREQ_MPI="openmpi3/3.1.4"
 #
 # NOTE: for impi/, set FC=mpiifort (note two "ii"). currently, this is being done in the mkmf.template.mazama.
 # ugh...
-#module load impi_19/
-#MPI="impi19"
-#PREREQ_MPI="impi/2019.6.166"
+module load impi_19/
+MPI="impi19"
+PREREQ_MPI="impi/2019.6.166"
 #
 #
 #NETCDF_INC=/share/cees/software/netcdf/intel19-openmpi4/include
@@ -29,7 +29,7 @@ module load netcdf/
 module load netcdf-fortran/
 module load udunits/
 #
-DO_CLEAN=0
+DO_CLEAN=1
 DO_MODULE=1
 # I don't actually know what version this is...
 VER=1.0.0
@@ -209,8 +209,8 @@ cat << EOF  >submit.sh
 module purge
 module load intel/19
 #
-module load openmpi_3/3.1.4
-#module load impi_19/
+#module load openmpi_3/3.1.4
+module load impi_19/
 #module load mpich_3/
 #
 module load dycore/
@@ -236,3 +236,5 @@ echo "submit.sh should be created..."
 
 cd ${WORK_DIR}
 sbatch submit.sh
+
+watch squeue -u ${USER}

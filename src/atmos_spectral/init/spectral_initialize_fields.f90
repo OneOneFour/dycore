@@ -154,6 +154,9 @@ call trans_spherical_to_grid(divs, divg)
 global_mean_psg = area_weighted_global_mean(psg)
 if(mpp_pe() == mpp_root_pe()) then
   print '("mean surface pressure=",f9.4," mb")',.01*global_mean_psg
+  ! yoder
+  !print '("initial_perturbation=")',initial_perturbation
+  print '("initial_perturbation=",E9.4 )', initial_perturbation
 endif
 
 return
