@@ -175,11 +175,15 @@ real    :: damping_coeff       = 1.65740741e-4, & ! (one tenth day)**-1 ; change
          ocean_topog_smoothing = .93, &
            initial_sphum       = 0.0, &
      reference_sea_level_press =  101325.
-!changed scale height from 4 to 12 shouldn't matter as it affects vert_coord_system 
+!changed scale height from 4 to 12 shouldn't matter as it affects vert_coord_system
+!
+! yoder: add initial_perturbation parameter (see spectral_initialize_fieds.f90)??
+!real :: initial_perturbation   = 2.e-7
 !===============================================================================================
 
 real, dimension(2) :: valid_range_t = (/1., 900./)
-
+!
+! yoder: adding initial_perturbation to end of this? but i think i'm going to put it into the nml for spectral_init_cond instead.
 namelist /spectral_dynamics_nml/ use_virtual_temperature, damping_option,                            &
                                  damping_order, damping_coeff, damping_order_vor, damping_coeff_vor, &
                                  damping_order_div, damping_coeff_div, do_mass_correction,           &
@@ -224,7 +228,7 @@ character(len=128) :: tname, longname, units, tracer_restart_file
 ! < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < > < >
 
 if(module_is_initialized) return
-
+!
 unit = open_namelist_file()
 ierr=1
 do while (ierr /= 0)
@@ -570,6 +574,8 @@ else if(file_exist('INPUT/spectral_dynamics.res')) then
 else
   previous = 1
   current  = 1
+  ! yoder: possibly add initial_perturbation_pram here? but i think i'm going to put it into the nml for spectral_init_cond instead.
+  !
   call spectral_init_cond(reference_sea_level_press, triang_trunc, use_virtual_temperature, topography_option,  &
                           vert_coord_option, vert_difference_option, scale_heights, surf_res, p_press, p_sigma, &
                           exponent, ocean_topog_smoothing, pk, bk,                                              &

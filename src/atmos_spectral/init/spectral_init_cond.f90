@@ -59,9 +59,12 @@ character(len=128), parameter :: tagname = &
 public :: spectral_init_cond
 
 real :: initial_temperature=264.
+!
+! yoder:
+real :: initial_perturbation=2.e-7
 
-namelist / spectral_init_cond_nml / initial_temperature
-
+!namelist / spectral_init_cond_nml / initial_temperature
+namelist / spectral_init_cond_nml / initial_temperature, initial_perturbation
 contains
 
 !=========================================================================================================================
@@ -84,11 +87,15 @@ real,    intent(out), dimension(:,:,:) :: vorg, divg
 real,    intent(out), dimension(:,:  ) :: surf_geopotential
 logical, optional, intent(in), dimension(:,:) :: ocean_mask
 
+!yoder:
+!real,    intent(in) :: initial_perturbation
+
 integer :: choice_of_init = 2
 integer :: unit, ierr, io
 
 !------------------------------------------------------------------------------------------------
-
+! yoder:
+!print *, "***DEBUG spectral_init_cond_nml: initial_perturbation=", initial_perturbation
 unit = open_namelist_file()
 ierr=1
 do while (ierr /= 0)
@@ -103,9 +110,10 @@ call compute_vert_coord (vert_coord_option, scale_heights, surf_res, exponent, p
 
 call get_topography(topography_option, ocean_topog_smoothing, surf_geopotential, ocean_mask)
 call press_and_geopot_init(pk, bk, use_virtual_temperature, vert_difference_option, surf_geopotential)
-
+!
+! yoder add initial_perturbatoion to spectral_initialize_fields() call.
 call spectral_initialize_fields(reference_sea_level_press, triang_trunc, choice_of_init, initial_temperature, &
-                  surf_geopotential, ln_ps, vors, divs, ts, psg, ug, vg, tg, vorg, divg)
+            surf_geopotential, ln_ps, vors, divs, ts, psg, ug, vg, tg, vorg, divg, initial_perturbation)
 
 call check_vert_coord(size(ug,3), psg)
 

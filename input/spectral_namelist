@@ -1,5 +1,6 @@
 
 # Note: damping_order = 4 specifies del 8'th diffusion
+# yoder: adding initial_perturbation
 
  &spectral_dynamics_nml
     damping_option          = 'resolution_dependent',
