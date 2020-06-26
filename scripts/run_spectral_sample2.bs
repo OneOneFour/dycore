@@ -8,6 +8,15 @@
 #
 ###SBATCH --ntasks-per-node=8
 #
+# General Descripiton:
+#  This is a samnple script to run a dycore-spectral model on Mazama HPC. The script can be fairly easily modified
+#  to run in another environment, particularly an HPC environment that uses LMOD for software.
+#  Note the sample scripts that came with the package (for me at least) includid compiling the code ant then running
+# from a local executable... which seemed sort of silly. This version references the compiled executable via
+#  environment variables. The code has been successfully compile using the Intel/19 compilers and openmpi3, mpich3, and impi.
+#  gnu compilers have not (yet) been tested.
+#
+#
 module purge
 module load intel/19
 COMP="intel19"
@@ -20,7 +29,7 @@ module load dycore/
 #
 # How to run a job...
 echo "Write an input script, copy"
-WORK_DIR="`cd ..;pwd`/workdir_run2_${COMP}_${MPI}"
+WORK_DIR="`cd ..;pwd`/workdir_sample2_${COMP}_${MPI}"
 echo "WORK_DIR: ${WORK_DIR}"
 #exit 1
 #
@@ -51,9 +60,10 @@ cd ${WORK_DIR}
 # create an input.nml file and ...
 # set run length and time step, get input data and executable
 cat > input.nml << EOF
- &main_nml
+&main_nml
      days   = 100,
      dt_atmos = 600 /
+&spectral_init_cond_nml initial_temperature = 275.0, initial_perturbation = 2.001e-7 /
 EOF
 #
 # now, pull configuration data from the DyCore source into the input:
@@ -78,9 +88,9 @@ mpirun -np ${npes} fms.x
 #
 # combine netcdf files
 if [[ ${npes} -gt 1 ]]; then
-  for ncfile in \$( ls *.nc.0000 )
+  for ncfile in $( ls *.nc.0000 )
   do
-    \${MPPNCCOMBINE}  -v -r \$ncfile
+    ${DYCORE_MPPNCCOMBINE}  -v -r $ncfile
   done
 fi
 #

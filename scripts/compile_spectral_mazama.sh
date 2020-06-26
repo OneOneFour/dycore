@@ -186,7 +186,7 @@ cat $namelist >> input.nml
 cp $diagtable diag_table
 cp $fieldtable field_table
 #cp $execdir/fms.x fms.x
-
+#
 #
 #exit 1
 echo "now create and submit a batch script in ${WORK_DIR}: "
