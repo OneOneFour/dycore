@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+#SBATCH --ntasks=1
+#SBATCH --output=dycore_restart_%j.out
+#SBATCH --error=dycore=restart_%j.err
+#SBATCH --job-name=dycore-restart
+#
+
+# look for stopped jobs and restart. This script is probably not the best SLURM strategy, for most queues, though we can
+# make it a little more efficient by using a pre-processing scirpt ot construct the array input.
+#
+WORK_DIR="/scratch/myoder96/dycore/workdir_IP_iter"
+NPES=8
+#
+if [[ ! -z ${SLURM_ARRAY_TASK_ID} ]]; then
+    echo "Setting up array: [${SLURM_ARRAY_TASK_ID}]"
+    #PRAM_INITIAL_TEMP = `echo "${PRAM_INITIAL_TEMP} + ${SLURM_ARRAY_TASK_ID}"|bc`
+    #V2=$(awk "BEGIN {printf \"%.9f\n\", 2e-7 * 2.1}")
+    #PRAM_INITIAL_TEMP=$(awk "BEGIN {printf \"%.9f\n\", ${PRAM_INITIAL_TEMP} + ${PRAM_TEMP_STEP}*${SLURM_ARRAY_TASK_ID}} ")
+    #PRAM_INITIAL_PERTURBATION=$(awk "BEGIN {printf \"%.9E\n\", ${PRAM_INITIAL_PERTURBATION} + ${PRAM_IP_STEP}*${SLURM_ARRAY_TASK_ID} } ")
+    #
+    WORK_DIR=${WORK_DIR}/ary_${SLURM_ARRAY_TASK_ID}
+    #
+    echo "WORK_DIR(ary): ${WORK_DIR}"
+fi
+#
+cd ${WORK_DIR}
+if [[ -f atmos_daily.nc.0000  ]];
+    then
+    # there are unconsolidated files; the job probably broke. I think we can move (not copy) data to INPUT
+    mv RESTART/* INPUT/
+    #
+    mpirun -np ${NPES} fms.x
+    #
+    # combine netcdf files
+    if [[ ${NPES} -gt 1 ]]; then
+      for ncfile in $( ls *.nc.0000 )
+      do
+        ${DYCORE_MPPNCCOMBINE}  -v -r $ncfile
+      done
+    fi
+fi
+#
+# TODO: write a separate script, based on this loop, to echo out a list of array indices. Alternatively, use this loop
+#  to batch a separate restart script (load modules, launch MPI, consolidate)
+#for dir in ${WORK_DIR}/*/
+#do
+#    dir=${dir%*/}      # remove the trailing "/"
+#    echo "Work subdir:  ${dir##*/}"    # print everything after the final "/"
+#    #
+#    # did the job finish? good and bad ways to determine this. Fow now, just look for one or more unconsolidated file:
+#    # for now, hardcode...
+#    # TODO: use a regular expression or pattern
+#    # are there unconsolidated files? do the averages exist? NOTE: the consolidated data files appear to be
+#    if [[ -f atmos_daily.nc.0001  ]];
+#    then
+#        # copy RESTART materials to INPUT and restart:
+#        mpirun -np ${NPES} fms.x
+#        #
+#        # combine netcdf files
+#        if [[ ${NPES} -gt 1 ]]; then
+#          for ncfile in $( ls *.nc.0000 )
+#          do
+#            ${DYCORE_MPPNCCOMBINE}  -v -r $ncfile
+#          done
+#fi
+#
+            
+    fi
+done

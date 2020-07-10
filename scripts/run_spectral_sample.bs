@@ -20,26 +20,27 @@
 module purge
 module load intel/19
 COMP="intel19"
-module load openmpi_3/3.1.4
-MPI="openmpi3"
+#module load openmpi_3/3.1.4
+#MPI="openmpi3"
 # module load mpich_3/
 # MPI="mpich3"
-# module load impi_19/
-# MPI="impi19"
+module load impi_19/
+MPI="impi19"
 #
 module load dycore/
 #
 ###############################################
 # User defined variables:
 # user variables:
-EXPERIMENT_NAME="sample"     # will (or can be) part of working directory definition (see WORK_DIR below)
+EXPERIMENT_NAME="IP_iter"     # will (or can be) part of working directory definition (see WORK_DIR below)
 #
-RUN_TIME_DAYS=600
+RUN_TIME_DAYS=400
 DT_ATMOS=600
 # some initial values for variable parameters:
 PRAM_INITIAL_TEMP=274.0
 PRAM_INITIAL_PERTURBATION=2.0e-7
 PRAM_IP_STEP=1.0e-7         # PRAM_INITIAL_PERTURBATION=PRAM_INITIAL_PERTURBATION + SLURM_JOB_ID*PRAM_IP_STEP
+PRAM_TEMP_STEP=0.0
 #
 # N Processors:
 if [[ ! -z ${SLURM_NTASKS} ]]; then
@@ -50,9 +51,10 @@ fi
 if [[ -z ${NPES} ]]; then NPES=8; fi
 #
 # Actual computations and data will happen in WORK_DIR:
-#ROOT_DIR="`cd ..;pwd`"
-ROOT_DIR="`pwd`"
+ROOT_DIR="`cd ..;pwd`"
+#ROOT_DIR="`pwd`"
 WORK_DIR="${ROOT_DIR}/workdir_${EXPERIMENT_NAME}"
+#WORK_DIR="$SCRATCH/public/aditi/dycore/IP_iterations_Jul09"
 echo "WORK_DIR: ${WORK_DIR}"
 #
 # Simulator setup variables; these get copied into input.nml
@@ -76,7 +78,7 @@ if [[ ! -z ${SLURM_ARRAY_TASK_ID} ]]; then
     echo "Setting up array: [${SLURM_ARRAY_TASK_ID}]"
     #PRAM_INITIAL_TEMP = `echo "${PRAM_INITIAL_TEMP} + ${SLURM_ARRAY_TASK_ID}"|bc`
     #V2=$(awk "BEGIN {printf \"%.9f\n\", 2e-7 * 2.1}")
-    PRAM_INITIAL_TEMP=$(awk "BEGIN {printf \"%.9f\n\", ${PRAM_INITIAL_TEMP} + ${SLURM_ARRAY_TASK_ID}} ")
+    #PRAM_INITIAL_TEMP=$(awk "BEGIN {printf \"%.9f\n\", ${PRAM_INITIAL_TEMP} + ${PRAM_TEMP_STEP}*${SLURM_ARRAY_TASK_ID}} ")
     PRAM_INITIAL_PERTURBATION=$(awk "BEGIN {printf \"%.9E\n\", ${PRAM_INITIAL_PERTURBATION} + ${PRAM_IP_STEP}*${SLURM_ARRAY_TASK_ID} } ")
     #
     WORK_DIR=${WORK_DIR}/ary_${SLURM_ARRAY_TASK_ID}

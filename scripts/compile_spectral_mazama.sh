@@ -8,9 +8,15 @@ module load intel/19
 COMP="intel19"
 PREREQ_COMP="intel/19.1.0.166"
 #
-#module load openmpi_3/3.1.4
-#MPI="openmpi3"
-#PREREQ_MPI="openmpi3/3.1.4"
+MPI_MOD_STR="openmpi_3/3.1.4"
+MPI="openmpi3"
+#MPI_MOD_STR="mpich_3/3.3.1"
+#MPI="mpich3"
+#MPI_MOD_STR="impi/2019.6.166"
+#MPI="impi19"
+
+module load ${MPI_MOD_STR}
+#
 #
 #module load mpich_3/
 #MPI="mpich3"
@@ -18,9 +24,9 @@ PREREQ_COMP="intel/19.1.0.166"
 #
 # NOTE: for impi/, set FC=mpiifort (note two "ii"). currently, this is being done in the mkmf.template.mazama.
 # ugh...
-module load impi_19/
-MPI="impi19"
-PREREQ_MPI="impi/2019.6.166"
+#module load impi_19/
+#MPI="impi19"
+#PREREQ_MPI="impi/2019.6.166"
 #
 #
 #NETCDF_INC=/share/cees/software/netcdf/intel19-openmpi4/include
@@ -80,7 +86,7 @@ set -x
 # define variables
 platform=mazama  # A unique identifier for your platform
 npes=4  # number of processors
-WORK_DIR=$ATM_DYCORES_RUN_DIR/workdir_${COMP_MPI}  # where model is run and model output is produced
+WORK_DIR=$ATM_DYCORES_RUN_DIR/workdir_compile_${COMP_MPI}  # where model is run and model output is produced
 execdir=$ATM_DYCORES_RUN_DIR/exec_spectral.$platform  # code is compiled and executable located 
 template=$ATM_DYCORES_RUN_DIR/bin/mkmf.template.$platform   # path to template for your platform
 mkmf=$ATM_DYCORES_RUN_DIR/bin/mkmf                      # path to executable mkmf
@@ -144,7 +150,7 @@ cat > ${MODULE_PATH}/${VER}.lua <<EOF
 -- -*- lua -*-
 --
 prereq("${PREREQ_COMP}")
-prereq("${PREREQ_MPI}")
+prereq("${MPI_MOD_STR}")
 --
 depends_on("netcdf/")
 depends_on("netcdf-fortran/")
@@ -209,8 +215,8 @@ cat << EOF  >submit.sh
 module purge
 module load intel/19
 #
-#module load openmpi_3/3.1.4
-module load impi_19/
+module load ${MPI_MOD_STR}
+#module load impi_19/
 #module load mpich_3/
 #
 module load dycore/
