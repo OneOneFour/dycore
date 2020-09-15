@@ -6,7 +6,6 @@
 #SBATCH --output=dycore_outfile.%j.out
 #SBATCH --error=dycore_outfile.%j.err
 #
-###SBATCH --ntasks-per-node=8
 #
 # General Descripiton:
 #  This is a samnple script to run a dycore-spectral model on Mazama HPC. The script can be fairly easily modified
@@ -16,23 +15,24 @@
 #  environment variables. The code has been successfully compile using the Intel/19 compilers and openmpi3, mpich3, and impi.
 #  gnu compilers have not (yet) been tested.
 #
+echo "Begin running run_spectral_sample.bs"
 #
 module purge
 module load intel/19
 COMP="intel19"
-#module load openmpi_3/3.1.4
-#MPI="openmpi3"
+module load openmpi_3/3.1.4
+MPI="openmpi3"
 # module load mpich_3/
 # MPI="mpich3"
-module load impi_19/
-MPI="impi19"
+#module load impi_19/
+#MPI="impi19"
 #
 module load dycore/
 #
 ###############################################
 # User defined variables:
 # user variables:
-EXPERIMENT_NAME="IP_iter"     # will (or can be) part of working directory definition (see WORK_DIR below)
+EXPERIMENT_NAME="IP_iter_height0"     # will (or can be) part of working directory definition (see WORK_DIR below)
 #
 RUN_TIME_DAYS=400
 DT_ATMOS=600
@@ -41,6 +41,7 @@ PRAM_INITIAL_TEMP=274.0
 PRAM_INITIAL_PERTURBATION=2.0e-7
 PRAM_IP_STEP=1.0e-7         # PRAM_INITIAL_PERTURBATION=PRAM_INITIAL_PERTURBATION + SLURM_JOB_ID*PRAM_IP_STEP
 PRAM_TEMP_STEP=0.0
+GAUSS_HEIGHT=4000.0
 #
 # N Processors:
 if [[ ! -z ${SLURM_NTASKS} ]]; then
@@ -111,7 +112,13 @@ cat > input.nml << EOF
      dt_atmos = ${DT_ATMOS} /
 
 &spectral_init_cond_nml initial_temperature = ${PRAM_INITIAL_TEMP}, initial_perturbation = ${PRAM_INITIAL_PERTURBATION} /
+
+&gaussian_topog_nml height = ${GAUSS_HEIGHT} /
+
 EOF
+#
+# we can also add prams:
+# namelist /gaussian_topog_nml/ height, olon, olat, wlon, wlat, rlon, rlat
 #
 # now, pull configuration data from the DyCore source into the input:
 cat ${NAME_LIST} >> input.nml
@@ -126,6 +133,11 @@ cp ${FIELD_TABLE} field_table
 ulimit -s unlimited
 #
 mpirun -np ${NPES} fms.x
+#
+if [[ ! $? -eq 0 ]]; then
+    echo "Error executing fms.x. Exiting."
+    exit 1
+fi
 #
 # combine netcdf files
 if [[ ${NPES} -gt 1 ]]; then

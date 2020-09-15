@@ -2,18 +2,20 @@
 #export MODULEPATH=/usr/local/modulefiles:/share/cees/modules/modulefiles:/opt/ohpc/pub/modulefiles
 export MODULEPATH=/share/cees/modules/modulefiles:/opt/ohpc/pub/modulefiles
 #
+# TODO: integrate compile_template_module dynamic compiler, MPI, etc. elements
+#
 module purge
 #module load anaconda3/
 module load intel/19
 COMP="intel19"
 PREREQ_COMP="intel/19.1.0.166"
 #
-MPI_MOD_STR="openmpi_3/3.1.4"
-MPI="openmpi3"
+#MPI_MOD_STR="openmpi_3/3.1.4"
+#MPI="openmpi3"
 #MPI_MOD_STR="mpich_3/3.3.1"
 #MPI="mpich3"
-#MPI_MOD_STR="impi/2019.6.166"
-#MPI="impi19"
+MPI_MOD_STR="impi/2019.6.166"
+MPI="impi19"
 
 module load ${MPI_MOD_STR}
 #
@@ -216,10 +218,8 @@ module purge
 module load intel/19
 #
 module load ${MPI_MOD_STR}
-#module load impi_19/
-#module load mpich_3/
 #
-module load dycore/
+module --ignore-cache load dycore/
 module load udunits/
 #
 ulimit -s unlimited

@@ -1,34 +1,61 @@
 #!/bin/bash
 #
-#SBATCH --ntasks=1
+#SBATCH --ntasks=8
 #SBATCH --output=dycore_restart_%j.out
-#SBATCH --error=dycore=restart_%j.err
+#SBATCH --error=dycore_restart_%j.err
 #SBATCH --job-name=dycore-restart
 #
 
+module purge
+module load intel/19
+COMP="intel19"
+#module load openmpi_3/3.1.4
+#MPI="openmpi3"
+module load mpich_3/
+ MPI="mpich3"
+#module load impi_19/
+#MPI="impi19"
+#
+module load dycore/
+#
 # look for stopped jobs and restart. This script is probably not the best SLURM strategy, for most queues, though we can
 # make it a little more efficient by using a pre-processing scirpt ot construct the array input.
 #
 WORK_DIR="/scratch/myoder96/dycore/workdir_IP_iter"
-NPES=8
+#
+# be sure this is an abs-path:
+WORK_DIR=`cd ${WORK_DIR};pwd`
+
+echo "WORK_DIR(ary): ${WORK_DIR}"
+
+if [[ ! -z ${SLURM_NTASKS} ]]; then
+	NPES=${SLURM_NTASKS}
+	echo "set NPES from SLURM: ${NPES} :: ${SLURM_NTASKS}"
+else
+	NPES=8
+fi
+
 #
 if [[ ! -z ${SLURM_ARRAY_TASK_ID} ]]; then
     echo "Setting up array: [${SLURM_ARRAY_TASK_ID}]"
     #PRAM_INITIAL_TEMP = `echo "${PRAM_INITIAL_TEMP} + ${SLURM_ARRAY_TASK_ID}"|bc`
     #V2=$(awk "BEGIN {printf \"%.9f\n\", 2e-7 * 2.1}")
     #PRAM_INITIAL_TEMP=$(awk "BEGIN {printf \"%.9f\n\", ${PRAM_INITIAL_TEMP} + ${PRAM_TEMP_STEP}*${SLURM_ARRAY_TASK_ID}} ")
-    #PRAM_INITIAL_PERTURBATION=$(awk "BEGIN {printf \"%.9E\n\", ${PRAM_INITIAL_PERTURBATION} + ${PRAM_IP_STEP}*${SLURM_ARRAY_TASK_ID} } ")
     #
     WORK_DIR=${WORK_DIR}/ary_${SLURM_ARRAY_TASK_ID}
-    #
-    echo "WORK_DIR(ary): ${WORK_DIR}"
 fi
 #
+echo "WORK_DIR(ary)[${NPES}]: ${WORK_DIR}"
+#
 cd ${WORK_DIR}
+echo "pwd: `pwd`"
+#
 if [[ -f atmos_daily.nc.0000  ]];
     then
     # there are unconsolidated files; the job probably broke. I think we can move (not copy) data to INPUT
-    mv RESTART/* INPUT/
+    if [[ ! $(ls -A ${WORK_DIR} ) ]]; then
+	mv ${WORK_DIR}/RESTART/* ${WORK_DIR}/INPUT/
+    fi
     #
     mpirun -np ${NPES} fms.x
     #
@@ -36,9 +63,12 @@ if [[ -f atmos_daily.nc.0000  ]];
     if [[ ${NPES} -gt 1 ]]; then
       for ncfile in $( ls *.nc.0000 )
       do
-        ${DYCORE_MPPNCCOMBINE}  -v -r $ncfile
+        echo "file: ${ncfile}"
+        ${DYCORE_MPPNCCOMBINE} -v -r ${ncfile}
       done
     fi
+else
+	echo "no atmnos_daily.nc.0000 file..."
 fi
 #
 # TODO: write a separate script, based on this loop, to echo out a list of array indices. Alternatively, use this loop
@@ -65,6 +95,4 @@ fi
 #          done
 #fi
 #
-            
-    fi
-done
+

@@ -11,21 +11,27 @@
 # this should be consistent for both gnu and intel compiler conventions
 # let's try to use the env. variables. also, do we need to substitute the mpicc for cc (in most cases?)? this will
 #  break the mppccombine program...
-#FC = ${MPIFC}
-#CC = ${MPICC}
-#LD = ${FC}
-#FC = mpifort
-#
-CC_spp = ${CC}
-CC = mpicc
-CXX = mpicxx
-MPICC=mpicc
+# TODO: try with env variables:
+FC = ${MPIFC}
+CC = ${MPICC}
+LD = ${MPIFC}
+CXX = ${MPICXX}
+# need to set the same-names? no. In fact, don't; you'll get a 'recursive variable references itself' error.
+
 #
 # for impi:
-FC = mpiifort
-MPIFC = mpiifort
-LD = mpiifort
+#CC_spp = ${CC}
+#CC = mpiicc
+#CXX = mpiicxx
+#MPICC=mpiicc
+#FC = mpiifort
+#MPIFC = mpiifort
+#LD = mpiifort
 # else:
+#CC_spp = ${CC}
+#CC = mpicc
+#CXX = mpicxx
+#MPICC=mpicc
 #FC = mpifort
 #MPIFC = mpifort
 #LD = mpifort

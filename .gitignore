@@ -4,6 +4,8 @@ exec_*/
 
 exec_spectral.mazama/
 
+._*
+
 *.err
 *.out
 data/
@@ -17,6 +19,8 @@ data/
 
 # because this is so compiler sensitive, let's exclude .o and all other compiled objects.
 *.o
+*.mod
 
 .DS_Store
 ._.DS_Store
+*/.DS_Store
