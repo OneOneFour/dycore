@@ -98,8 +98,8 @@ if [[ DO_RESTART -eq 1 ]]; then
     # remove INPUT?
     #if [[ -d INPUT ]]; then rm -rf INPUT/*; fi
     if [[ ! -d INPUT ]]; then mkdir INPUT; fi
-    mv RESTART INPUT
-    mkdir RESTART
+    if [[ ! -d RESTART ]]; then mkdir RESTART; fi
+    if [[ -d RESTART ]]; then mv RESTART INPUT; fi
 else
     if [[ -d ${WORK_DIR} ]]; then rm -rf ${WORK_DIR}; fi
     #
@@ -117,10 +117,11 @@ fi
 # Construct the necessary inputs; put them into ${WORK_DIR}
 cd ${WORK_DIR}
 #
-# write a little info-file:
+# write a littl/Users/myoder96/mazama_scratch/dycore/jobs/run_height_0.bse info-file:
 cat > run_info.txt << EOF
 # Dycore Run information
 #
+NPES=${NPES}
 PRAM_GAUSS_TOPO_HEIGHT=${PRAM_GAUSS_TOPO_HEIGHT}
 PRAM_INITIAL_PERTURBATION=${PRAM_INITIAL_PERTURBATION}
 PRAM_IP_STEP=${PRAM_IP_STEP}
@@ -129,6 +130,7 @@ EOF
 #
 # create an input.nml file and ...
 # set run length and time step, get input data and executable
+rm input.nml
 if [[ ! -f input.nml ]]; then
 cat > input.nml << EOF
 &main_nml
@@ -160,15 +162,17 @@ ulimit -s unlimited
 mpirun -np ${NPES} fms.x
 #srun -n ${NPES} fms.x
 #
-if [[ $? -neq 0 ]]; then
+if [[ ! $? -eq 0 ]]; then
+    echo "job failed after mpirun "
     exit 1
 fi
 #
-# combine netcdf files
-if [[ ${NPES} -gt 1 ]]; then
-  for ncfile in $( ls *.nc.0000 )
-  do
-    ${DYCORE_MPPNCCOMBINE}  -v -r $ncfile
-  done
-fi
 #
+## combine netcdf files
+#if [[ ${NPES} -gt 1 ]]; then
+#  for ncfile in $( ls *.nc.0000 )
+#  do
+#    ${DYCORE_MPPNCCOMBINE}  -v -r $ncfile
+#  done
+#fi
+##
