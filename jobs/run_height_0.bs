@@ -168,11 +168,17 @@ if [[ ! $? -eq 0 ]]; then
 fi
 #
 #
-## combine netcdf files
-#if [[ ${NPES} -gt 1 ]]; then
-#  for ncfile in $( ls *.nc.0000 )
-#  do
-#    ${DYCORE_MPPNCCOMBINE}  -v -r $ncfile
-#  done
-#fi
-##
+# combine netcdf files
+if [[ ${NPES} -gt 1 ]]; then
+  for ncfile in $( ls *.nc.0000 )
+  do
+    ${DYCORE_MPPNCCOMBINE}  -v -r $ncfile
+  done
+fi
+#
+# TODO: incorporate better (any real...) multi-run capabilities. We have some python utilities to concatenate outputs, as well as to read outputs to see if we need
+#  to keep running (batch a new job). See for example something like this (noting that we'll need to collect the python scripts, etc.). Note that bash cannot natively
+#  do floating point math, so we need to either always have integer days (and report them as such) or use awk, as shown below... or write it all in Python, which is the
+#  right way to go, but more involved.
+#
+# if [[ 1 -eq "$( echo "`python ../dycore/check_dycore_time.py ary_5/atmos_daily_1.nc` < 400" | bc)" ]]; then echo "yup."; else echo "nope."; fi

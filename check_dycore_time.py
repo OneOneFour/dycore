@@ -10,6 +10,7 @@ if __name__=="__main__":
     #
     with netCDF4.Dataset(fin_name, 'r') as fout:
         #print('** time: {}\n'.format(fout.variables['time'][0]))
-        print(fout.variables['time'][0])
+        #print(fout.variables['time'][0])
+        print(fout.variables['time'][-1])
 #
 
