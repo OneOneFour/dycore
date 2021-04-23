@@ -16,6 +16,15 @@
 #  environment variables. The code has been successfully compile using the Intel/19 compilers and openmpi3, mpich3, and impi.
 #  gnu compilers have not (yet) been tested.
 #
+# This script is designed to use --array to iterate over the variable, initial_perturbation (PRAM_INITIAL_PERTURBATION).
+#  We'll also be looking at gaussian_height and the del_h parameter:
+#  the delh parameter in the src/atmos_param/hs_forcing.f90
+# use &hs_forcing_nml delh=50 / , etc.
+#
+# TODO: in this, or a copy of it, allow for input parameters, and/or write a more complex array iteration. It would be nice
+#  to find a more modular way to do this (ie, not hard-coding the experiment specs into the arrray). Maybe we make a file with
+#  a list of experiment prams??? Generally, this workflow is still pretty complicated and could use cleaning up.
+#
 #
 module purge
 module load intel/19
@@ -90,7 +99,7 @@ fi
 #######################
 #
 # CAREFULL!!!
-# If doing a resrtaert, move files. If not, clean up an restart.a
+# If doing a resrtaert, move files. If not, clean up and restart.
 if [[ DO_RESTART -eq 1 ]]; then
     if [[ ! -d ${WORK_DIR} ]]; then mkdir -p ${WORK_DIR}; fi
     cd ${WORK_DIR}
