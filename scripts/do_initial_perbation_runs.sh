@@ -1,4 +1,6 @@
 # script to run initial perturbation sequence.
+# NOTE: this, I think, was not necessary. I was having some trouble getting
+#  jobs to finish and thought it would be better to break up the array.
 #
 # run a sequence of job arrays:
 

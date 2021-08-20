@@ -47,9 +47,8 @@ COMP_MPI_MODS="${COMP}-${MPI}"
 #
 
 #
-# yoder: for improved portability, do we need Bob's anaconda/lib?
-# /data/cees/clapp/anaconda3/lib:
-#LD_LIBRARY_PATH="/data/cees/clapp/anaconda3/lib:/share/cees/software/netcdf/intel19-openmpi4/lib64:${LD_LIBRARY_PATH}"
+# TODO: we may have needed this, or needed to put it forst for some reason. but
+#  we shouldn't need to specify /usr/lib64 should we?
 LD_LIBRARY_PATH="/usr/lib64:${LD_LIBRARY_PATH}"
 PARTITION="twohour"
 #

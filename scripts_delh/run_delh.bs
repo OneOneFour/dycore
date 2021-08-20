@@ -1,11 +1,12 @@
 #!/bin/bash
 #
 #SBATCH --job-name=dycore
-#SBATCH --ntasks=48
+#SBATCH --ntasks=32
 #SBATCH --partition=cees,ere,twohour
-#SBATCH --output=dycore_outfile.%j.out
-#SBATCH --error=dycore_outfile.%j.err
+#SBATCH --output=dycore_outfile_%j.out
+#SBATCH --error=dycore_outfile_%j.err
 #SBATCH --array=0-14%3
+#SBATCH --time=02:00:00
 #
 #
 # General Descripiton:
@@ -15,7 +16,8 @@
 # from a local executable... which seemed sort of silly. This version references the compiled executable via
 #  environment variables. The code has been successfully compile using the Intel/19 compilers and openmpi3, mpich3, and impi.
 #  gnu compilers have not (yet) been tested.
-
+#
+# for delh:
 # try &hs_forcing_nml delh = {my val} /
 #
 echo "Begin running run_spectral_sample.bs"
@@ -35,10 +37,10 @@ module load dycore/
 ###############################################
 # User defined variables:
 # user variables:
-EXPERIMENT_NAME="DELH_"     # will (or can be) part of working directory definition (see WORK_DIR below)
+EXPERIMENT_NAME="DELH"     # will (or can be) part of working directory definition (see WORK_DIR below)
 RESET_WORKDIR=0
 #
-RUN_TIME_DAYS=50
+RUN_TIME_DAYS=400
 #RUN_TIME_DAYS=800
 DT_ATMOS=600
 #
@@ -76,7 +78,9 @@ echo "WORK_DIR: ${WORK_DIR}"
 # (you should not need to edit these for individual perturbation runs, but you might make changes to
 #  re-define your environment. These variables define some physical constants and other bits).
 #
-NAME_LIST=${DYCORE_DIR}/input/spectral_namelist
+# TODO: one more pain... we have to keep track of what is(not) defined in the namelist. SO, it's time to use the AM4 nml (and other )tools.
+#NAME_LIST=${DYCORE_DIR}/input/spectral_namelist
+NAME_LIST=`pwd`/namelist_delh.nml
 DIAG_TABLE=${DYCORE_DIR}/input/hs_diag_table
 FIELD_TABLE=${DYCORE_DIR}/input/spectral_field_table
 #
@@ -135,15 +139,16 @@ cd ${WORK_DIR}
 # create an input.nml file and ...
 # set run length and time step, get input data and executable
 cat > input.nml << EOF
-&main_nml
+ &main_nml
      days   = ${RUN_TIME_DAYS},
      dt_atmos = ${DT_ATMOS} /
 
-&spectral_init_cond_nml initial_temperature = ${PRAM_INITIAL_TEMP}, initial_perturbation = ${PRAM_INITIAL_PERTURBATION} /
+ &spectral_init_cond_nml initial_temperature = ${PRAM_INITIAL_TEMP}, initial_perturbation = ${PRAM_INITIAL_PERTURBATION} /
 
-&gaussian_topog_nml height = ${GAUSS_HEIGHT} /
+ &gaussian_topog_nml height = ${GAUSS_HEIGHT} /
 
-&hs_forcing_nml delh = ${DELH} /
+ &hs_forcing_nml
+     delh = ${PRAM_DELH} /
 
 EOF
 #
@@ -170,7 +175,11 @@ ulimit -s unlimited
 #  outputs, but that's more work than I have time for now, so we'll assume our job finishes.
 #
 # if there are restart files, use them:
-mv ${WORK_DIR}/RESTART/* ${WORK_DIR}/INPUT/
+# Only do this if not empty.
+if [ ! -z "$(ls -A ${WORK_DIR}/RESTART)" ]; then
+    mv ${WORK_DIR}/RESTART/* ${WORK_DIR}/INPUT/
+fi
+#
 mpirun -np ${NPES} fms.x
 #
 if [[ ! $? -eq 0 ]]; then

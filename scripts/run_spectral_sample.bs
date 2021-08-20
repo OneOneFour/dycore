@@ -34,7 +34,7 @@ module load dycore/
 # user variables:
 EXPERIMENT_NAME="IP_iter_height0"     # will (or can be) part of working directory definition (see WORK_DIR below)
 #
-RUN_TIME_DAYS=400
+RUN_TIME_DAYS=100
 DT_ATMOS=600
 # some initial values for variable parameters:
 PRAM_INITIAL_TEMP=274.0
