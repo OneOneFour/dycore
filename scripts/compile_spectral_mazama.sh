@@ -60,6 +60,7 @@ PARTITION="twohour"
 #MODULE_PATH="${SCRATCH}/.local/modules/moduledeps/${COMP_MPI_MODS}/dycore"
 #module use scratch/myoder96/.local/modules/moduledeps
 
+PLATFORM="mazama"
 TARGET_PATH="/share/cees/software/DyCore/${COMP_MPI}/${VER}"
 TARGET_EXE_PATH="${TARGET_PATH}/exec"
 MODULE_PATH="/share/cees/modules/moduledeps/${COMP_MPI_MODS}/dycore"
@@ -75,8 +76,6 @@ export NETCDF_INCLUDE=$NETCDF_INC
 #
 echo "*** ATM_DYCORES_RUN_DIR: ${ATM_DYCORES_RUN_DIR}"
 #
-PARTITION=twohour
-#
 cd $ATM_DYCORES_RUN_DIR
 #
 # Minimal runscript: Spectral atmospheric core with Held-Suarez forcing
@@ -85,7 +84,7 @@ set -x
 #
 #------------------------------------------------------
 # define variables
-platform=mazama  # A unique identifier for your platform
+platform=${PLATFORM}  # A unique identifier for your platform
 npes=4  # number of processors
 WORK_DIR=$ATM_DYCORES_RUN_DIR/workdir_compile_${COMP_MPI}  # where model is run and model output is produced
 execdir=$ATM_DYCORES_RUN_DIR/exec_spectral.$platform  # code is compiled and executable located 
