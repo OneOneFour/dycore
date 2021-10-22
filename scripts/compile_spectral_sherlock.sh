@@ -1,21 +1,33 @@
-#!/bin/bash 
+#!/bin/bash
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem-per-cpu=2g
+#SBATCH --output=dycore_compile_%j.out
+#SBATCH --error=dycore_compile_%j.out
+#SBATCH --constraint=CPU_GEN:RME
 #
 # TODO: integrate compile_template_module dynamic compiler, MPI, etc. elements
+#
+module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_zen2-beta/linux-centos7-x86_64/Core
 #
 module purge
 #module load anaconda3/
 #module load intel/19
 #COMP="intel19"
 #PREREQ_COMP="intel/19.1.0.166"
-module load gcc-cees/
-module load mpich-cees/
+module load intel-cees-beta/
+module load mpich-cees-beta/
+#
+#module load gcc-cees-beta
+#module load mpich-cees-beta/
 #module load openmpi-cees/
 #
-COMP="gcc10"
+#COMP="gcc10"
+COMP="intel202104"
 MPI="mpich"
 #
-module load netcdf-c-cees/
-module load netcdf-fortran-cees/
+module load netcdf-c-cees-beta/
+module load netcdf-fortran-cees-beta/
 #module load udunits/
 #
 DO_CLEAN=1
@@ -26,7 +38,7 @@ COMP_MPI="${COMP}_${MPI}"
 # an unfortunate -/_ inconsistency (my bad...)
 COMP_MPI_MODS="${COMP}-${MPI}"
 #
-# TODO: we may have needed this, or needed to put it forst for some reason. but
+# TODO: we may have needed this, or needed to put it first for some reason. but
 #  we shouldn't need to specify /usr/lib64 should we?
 #LD_LIBRARY_PATH="/usr/lib64:${LD_LIBRARY_PATH}"
 PARTITION="serc"
@@ -41,22 +53,24 @@ MODULE_PATH="/share/cees/modules/moduledeps/${COMP_MPI_MODS}/dycore"
 ATM_DYCORES_RUN_DIR=`cd ..;pwd`
 ATM_DYCORES_SRC_DIR=`cd ..;pwd`
 #
-export NETCDF_PATH=$(dirname $(dirname $(which nc-config)))
-export NETCDF_INCLUDE=${NETCDF_PATH}/include
-export LD_LIBRARY_PATH=/usr/lib64:${LD_LIBRARY_PATH}
 #
 # let's move all the template stuff here, see how that works...
 CC_spp=${CC}
 FC=$(dirname  ${MPICC})/mpifort
 CC=${MPICC}
-LD=${MPIFC}
+#LD=${MPIFC}
+LD=${FC}
 CXX=${MPICXX}
+#
+echo "*** COMPILERS: CC: ${CC}"
+echo "*** CXX: ${CXX} "
+echo "*** FC: ${FC} "
 #
 MPI_PATH=$(dirname $(dirname ${MPICC}))
 echo "**** MPI_PATH:: $MPI_PATH"
 # MPICH:
 MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/mpich.pc --cflags)
-MPI_FFLAGS=$MPI_CFLAGS
+#MPI_FFLAGS=$MPI_CFLAGS
 MPI_LIBS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/mpich.pc --libs)
 #
 # OMPI
@@ -64,8 +78,10 @@ MPI_LIBS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/mpich.pc --libs)
 #MPI_CFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-c.pc --cflags)
 #MPI_LIBS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --libs)
 #
-export FFLAGS=" -O3 -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nc-config --cflags) $(nf-config --fflags) "
-export LIBS=" $(nc-config --flibs) $(nc-config --libs) $(nf-config --flibs) ${MPI_LIBS} "
+export FFLAGS=" -O3 -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) "
+#  $(nc-config --cflags)
+#  $(nc-config --libs)
+export LIBS=" $(nc-config --flibs) $(nf-config --flibs) "
 export LDFLAGS=" ${LIBS}"
 #
 export CFLAGS="-D__IFC ${MPI_CFLAGS} $(nc-config --cflags)"
@@ -99,7 +115,6 @@ mppnccombine=$ATM_DYCORES_SRC_DIR/bin/mppnccombine.$platform # path to executabl
 # NOTE: don't use the MPI compiler for this...
 
 if [ ! -f $mppnccombine ]; then
-	#$CC -O -o $mppnccombine -I${NETCDF_INC} -I{HDF5_DIR} -L${NETCDF_LIB} -L${HDF5_LIB} ./postprocessing/mppnccombine.c  -lnetcdf
 	${CC} -O -o $mppnccombine $(nc-config --cflags) $(nc-config --libs) ./postprocessing/mppnccombine.c
 	#
 	if [[ ! $? -eq 0 ]]; then
@@ -110,6 +125,9 @@ fi
 #
 #----------------------------------------------------
 # setup directory structure
+if [[ ${DO_CLEAN} -eq 1 ]]; then
+	rm -rf ${execdir}
+fi
 if [ ! -d $execdir ]; then  mkdir $execdir ; fi
 if [[ -e $WORK_DIR ]]; then rm -rf ${WORK_DIR}; fi
 if [ -e $WORK_DIR ]; then
