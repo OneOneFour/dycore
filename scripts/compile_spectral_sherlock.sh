@@ -11,20 +11,19 @@
 module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_zen2-beta/linux-centos7-x86_64/Core
 #
 module purge
-#module load anaconda3/
-#module load intel/19
-#COMP="intel19"
-#PREREQ_COMP="intel/19.1.0.166"
-module load intel-cees-beta/
+#module load intel-cees-beta/
+module load gcc-cees-beta/
+
 module load mpich-cees-beta/
+#module load intel-oneapi-mpi-cees-beta/
+#module load openmpi-cees-beta/
 #
-#module load gcc-cees-beta
-#module load mpich-cees-beta/
-#module load openmpi-cees/
 #
-#COMP="gcc10"
-COMP="intel202104"
-MPI="mpich"
+COMP="gcc11"
+#COMP="intel202104"
+#MPI="impi"
+#MPI="mpich"
+MPI="openmpi"
 #
 module load netcdf-c-cees-beta/
 module load netcdf-fortran-cees-beta/
@@ -54,36 +53,67 @@ ATM_DYCORES_RUN_DIR=`cd ..;pwd`
 ATM_DYCORES_SRC_DIR=`cd ..;pwd`
 #
 #
-# let's move all the template stuff here, see how that works...
+#########
+# Set Up Compiler-Name variables:
+#
+# NOTE: Moved all the mkmf.template stuff here:
+# gcc-MPICH and gcc-openmpi, intel-mpich
 CC_spp=${CC}
-FC=$(dirname  ${MPICC})/mpifort
+#FC=$(dirname  ${MPICC})/mpifort
+FC=${MPIF90}
 CC=${MPICC}
 #LD=${MPIFC}
 LD=${FC}
 CXX=${MPICXX}
 #
-echo "*** COMPILERS: CC: ${CC}"
-echo "*** CXX: ${CXX} "
-echo "*** FC: ${FC} "
+## intel-intel:
+## note: binaries are like mpicc, mpiicc, mpicxx, mpiicpc, ... don't really know the difference (if any)
+#CC_spp=icc
+#FC=$(dirname  $(which mpicc))/mpiifort
+#CC=$(dirname  $(which mpicc))/mpiicc
+##LD=${MPIFC}
+#LD=${FC}
+#CXX=$(dirname  $(which mpicc))/mpiicpc
 #
-MPI_PATH=$(dirname $(dirname ${MPICC}))
+## gcc-impi:
+# NOTE: these look like a gift, but I don't think they are; I think they are old  binaries (just
+#  the gnu@4.8.5 binaries). Maybe better if intel is compiled with a newer gcc?
+## note: binaries are like mpicc, mpiicc, mpicxx, mpiicpc, ... don't really know the difference (if any)
+#CC_spp=icc
+#FC=$(dirname  $(which mpicc))/mpifc
+#CC=$(dirname  $(which mpicc))/mpigcc
+##LD=${MPIFC}
+#LD=${FC}
+#CXX=$(dirname  $(which mpicc))/mpigxx
+#
+echo "*** COMPILERS: CC: ${CC} :: ${CXX} --version"
+echo "*** CXX: ${CXX} :: `${CXX} --version`"
+echo "*** FC: ${FC} :: ${FC} --version"
+#
+#MPI_PATH=$(dirname $(dirname ${MPICC}))
+MPI_PATH=$(dirname $(dirname $(which mpicc)))
 echo "**** MPI_PATH:: $MPI_PATH"
 # MPICH:
-MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/mpich.pc --cflags)
+#MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/mpich.pc --cflags)
 #MPI_FFLAGS=$MPI_CFLAGS
-MPI_LIBS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/mpich.pc --libs)
+#MPI_LIBS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/mpich.pc --libs)
 #
+##intel-oneapi-mpi
+#MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/impi.pc --cflags)
+#MPI_FFLAGS=$MPI_CFLAGS
+#MPI_LIBS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/impi.pc --libs)
+##
 # OMPI
-#MPI_FFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --cflags)
-#MPI_CFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-c.pc --cflags)
-#MPI_LIBS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --libs)
+MPI_FFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --cflags)
+MPI_CFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-c.pc --cflags)
+MPI_LIBS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --libs)
 #
-export FFLAGS=" -O3 -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) "
+
+export FFLAGS=" -O3 -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
 #  $(nc-config --cflags)
 #  $(nc-config --libs)
 export LIBS=" $(nc-config --flibs) $(nf-config --flibs) "
 export LDFLAGS=" ${LIBS}"
-#
 export CFLAGS="-D__IFC ${MPI_CFLAGS} $(nc-config --cflags)"
 
 ####
