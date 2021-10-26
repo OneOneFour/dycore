@@ -13,7 +13,7 @@
 #  to run in another environment, particularly an HPC environment that uses LMOD for software.
 #  Note the sample scripts that came with the package (for me at least) includid compiling the code ant then running
 # from a local executable... which seemed sort of silly. This version references the compiled executable via
-#  environment variables. The code has been successfully compile using the Intel/19 compilers and openmpi3, mpich3, and impi.
+#  environment variables. The code has been successfully compiled using the Intel/19 compilers and openmpi3, mpich3, and impi.
 #  gnu compilers have not (yet) been tested.
 #
 echo "Begin running run_spectral_sample.bs"
@@ -158,7 +158,7 @@ ulimit -s unlimited
 #  > copy RESTART/* INPUT/
 # and then stash away the combined output file and/or MPI component output files. Restarting appears to overwrite, not
 #  append to the component files, and mppnccombine will throw an error if the output aggregated file already exists.
-#  note that the best practice is to deterinine if output file(s) already exist, parse them, and increment the
+#  note that the best practice is to determine if output file(s) already exist, parse them, and increment the
 #  outputs, but that's more work than I have time for now, so we'll assume our job finishes.
 #
 mv ${WORK_DIR}/RESTART/* ${WORK_DIR}/INPUT/
