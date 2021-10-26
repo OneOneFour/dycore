@@ -1,11 +1,12 @@
 #!/bin/bash
 #
-#SBATCH --job-name=dycore
+#SBATCH --job-name=dycore_tree
 #SBATCH --ntasks=16
-#SBATCH --partition=twohour
-#SBATCH --output=dycore_outfile.%j.out
-#SBATCH --error=dycore_outfile.%j.err
-#SBATCH --array=0-14%3
+#SBATCH --partition=cees
+#SBATCH --time=12:00:00
+#SBATCH --output=dycore_tree_outfile_%A_%a.out
+#SBATCH --error=dycore_tree_outfile_%A_%a.err
+#SBATCH --array=0-9
 #
 #
 # General Descripiton:
@@ -21,10 +22,11 @@ echo "Begin running run_IP_tree..."
 module purge
 module load intel/19
 COMP="intel19"
-module load openmpi_3/3.1.4
-MPI="openmpi3"
-# module load mpich_3/
-# MPI="mpich3"
+
+#module load openmpi_3/3.1.4
+#MPI="openmpi3"
+module load mpich_3/
+MPI="mpich3"
 #module load impi_19/
 #MPI="impi19"
 #
@@ -70,11 +72,10 @@ fi
 if [[ -z ${NPES} ]]; then NPES=8; fi
 #
 # Actual computations and data will happen in WORK_DIR:
-ROOT_DIR="`cd ..;pwd`"
-#ROOT_DIR="`pwd`"
-WORK_DIR="${ROOT_DIR}/workdir_${EXPERIMENT_NAME}_${GAUSS_HEIGHT}"
-
-#WORK_DIR="$SCRATCH/public/aditi/dycore/IP_iterations_Jul09"
+ROOT_DIR="`pwd`"
+#WORK_DIR="${ROOT_DIR}/workdir_${EXPERIMENT_NAME}_${GAUSS_HEIGHT}"
+WORK_DIR="${ROOT_DIR}/workdir_${EXPERIMENT_NAME}"
+#
 echo "WORK_DIR: ${WORK_DIR}"
 #
 # Simulator setup variables; these get copied into input.nml
@@ -98,23 +99,25 @@ if [[ ! -z ${SLURM_ARRAY_TASK_ID} ]]; then
     echo "Setting up array: [${SLURM_ARRAY_TASK_ID}] % [${SLURM_ARRAY_TASK_COUNT}]"
     #
     PERTURBATION_INDEX=${SLURM_ARRAY_TASK_ID}
-     #
-    #PRAM_INITIAL_TEMP = `echo "${PRAM_INITIAL_TEMP} + ${SLURM_ARRAY_TASK_ID}"|bc`
-    #V2=$(awk "BEGIN {printf \"%.9f\n\", 2e-7 * 2.1}")
-    #PRAM_INITIAL_TEMP=$(awk "BEGIN {printf \"%.9f\n\", ${PRAM_INITIAL_TEMP} + ${PRAM_TEMP_STEP}*${SLURM_ARRAY_TASK_ID}} ")
-    #PRAM_INITIAL_PERTURBATION=$(( ${PRAM_INITIAL_PERTURBATION} + ${PRAM_IP_STEP} * (${SLURM_ARRAY_TASK_ID}) ))
+    #
     PRAM_INITIAL_PERTURBATION=$(awk "BEGIN {printf \"%.9E\n\", ${PRAM_INITIAL_PERTURBATION} + ${PRAM_IP_STEP}*${PERTURBATION_INDEX} }")
     if [[ ! -z $TREE_INDEX ]]; then
       PERTURBATION_INDEX=${TREE_INDEX}_${PERTURBATION_INDEX}
+      RESTART_SOURCE=${WORK_DIR}/perturb_${TREE_INDEX}
     fi
     #
     WORK_DIR=${WORK_DIR}/perturb_${PERTURBATION_INDEX}
     #
-    echo "WORK_DIR(ary)[${PERTURBATION_INDEX}, ${SEQ_INDEX}]: ${WORK_DIR}"
+    echo "WORK_DIR(ary)[${PERTURBATION_INDEX}]: ${WORK_DIR}"
+else
+    # figure out how to do this without an array...
+    if [[ ! -z $TREE_INDEX ]]; then
+      WORK_DIR=${WORK_DIR}_00_${TREE_INDEX}
+      RESTART_SOURCE=${WORK_DIR}_${TREE_INDEX}
+    fi
 fi
 #######################
 #
-#exit 1
 # Set up the workdir. For now, let's remove an existing workdir:
 # careful!!!
 if [[ -d ${WORK_DIR} && ${RESET_WORKDIR} -eq 1 ]]; then rm -rf ${WORK_DIR}; fi
@@ -123,9 +126,10 @@ for S in ${WORK_DIR}/INPUT ${WORK_DIR}/RESTART
 do
     if [[ ! -d ${S} ]]; then mkdir -p ${S}; fi
 done
-#if [[ ! -d ${WORK_DIR} ]]; then mkdir -p ${WORK_DIR}; fi
-#mkdir ${WORK_DIR}/INPUT
-#mkdir ${WORK_DIR}/RESTART
+#
+if [[ ! -z ${TREE_INDEX} ]]; then
+    cp -r ${RESTART_SOURCE}/RESTART/* ${WORK_DIR}/RESTART/
+fi
 #
 #
 #--------------------------------------------------
@@ -172,8 +176,9 @@ ulimit -s unlimited
 #  outputs, but that's more work than I have time for now, so we'll assume our job finishes.
 #
 # if there are restart files, use them:
-mv ${WORK_DIR}/RESTART/* ${WORK_DIR}/INPUT/
+mv ${WORK_DIR}/RESTART ${WORK_DIR}/INPUT
 mpirun -np ${NPES} fms.x
+#
 #
 if [[ ! $? -eq 0 ]]; then
     echo "Error executing fms.x. Exiting."
