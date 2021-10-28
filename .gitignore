@@ -5,6 +5,8 @@ exec_*/
 exec_spectral.mazama/
 
 ._*
+*/.*
+bin/
 
 *.err
 *.out

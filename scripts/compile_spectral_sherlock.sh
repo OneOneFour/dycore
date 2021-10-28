@@ -8,26 +8,35 @@
 #
 # TODO: integrate compile_template_module dynamic compiler, MPI, etc. elements
 #
-module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_zen2-beta/linux-centos7-x86_64/Core
+#module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_zen2-beta/linux-centos7-x86_64/Core
+module use /scratch/users/myoder96/spack_dev/base/spack/share/spack/lmod_intel19/linux-centos7-x86_64/Core 
 #
 module purge
-#module load intel-cees-beta/
-module load gcc-cees-beta/
 
-module load mpich-cees-beta/
+module load devel icc ifort
+module load intel-i19/
+module load mpich-i19/
+module load netcdf-c-i19/
+module load netcdf-fortran-i19/
+
+#module load intel-cees-beta/
+#module load gcc-cees-beta/
+
+#module load mpich-cees-beta/
 #module load intel-oneapi-mpi-cees-beta/
 #module load openmpi-cees-beta/
 #
 #
-COMP="gcc11"
+COMP="intel19"
+#COMP="gcc11"
 #COMP="intel202104"
 #MPI="impi"
-#MPI="mpich"
-MPI="openmpi"
+MPI="mpich"
+#MPI="openmpi"
 #
-module load netcdf-c-cees-beta/
-module load netcdf-fortran-cees-beta/
-#module load udunits/
+#module load netcdf-c-cees-beta/
+#module load netcdf-fortran-cees-beta/
+##module load udunits/
 #
 DO_CLEAN=1
 DO_MODULE=0
@@ -94,9 +103,9 @@ echo "*** FC: ${FC} :: ${FC} --version"
 MPI_PATH=$(dirname $(dirname $(which mpicc)))
 echo "**** MPI_PATH:: $MPI_PATH"
 # MPICH:
-#MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/mpich.pc --cflags)
-#MPI_FFLAGS=$MPI_CFLAGS
-#MPI_LIBS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/mpich.pc --libs)
+MPI_CFLAGS=$(pkg-config --cflags ${MPI_PATH}/lib/pkgconfig/mpich.pc)
+MPI_FFLAGS=$MPI_CFLAGS
+MPI_LIBS=$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc)
 #
 ##intel-oneapi-mpi
 #MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/impi.pc --cflags)
@@ -104,12 +113,12 @@ echo "**** MPI_PATH:: $MPI_PATH"
 #MPI_LIBS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/impi.pc --libs)
 ##
 # OMPI
-MPI_FFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --cflags)
-MPI_CFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-c.pc --cflags)
-MPI_LIBS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --libs)
+#MPI_FFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --cflags)
+#MPI_CFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-c.pc --cflags)
+#MPI_LIBS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --libs)
 #
-
-export FFLAGS=" -O3 -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+#export FFLAGS=" -O2 -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+export FFLAGS=" -O2 $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
 #  $(nc-config --cflags)
 #  $(nc-config --libs)
 export LIBS=" $(nc-config --flibs) $(nf-config --flibs) "
