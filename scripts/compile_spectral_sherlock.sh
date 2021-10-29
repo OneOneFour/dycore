@@ -8,16 +8,18 @@
 #
 # TODO: integrate compile_template_module dynamic compiler, MPI, etc. elements
 #
-#module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_zen2-beta/linux-centos7-x86_64/Core
-module use /scratch/users/myoder96/spack_dev/base/spack/share/spack/lmod_intel19/linux-centos7-x86_64/Core 
+module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_zen2-beta/linux-centos7-x86_64/Core
+#module use /scratch/users/myoder96/spack_dev/base/spack/share/spack/lmod_intel19/linux-centos7-x86_64/Core 
+#module use /scratch/users/myoder96/spack_dev/base/spack/share/spack/lmod_intel21/linux-centos7-x86_64/Core
 #
 module purge
 
-module load devel icc ifort
-module load intel-i19/
-module load mpich-i19/
-module load netcdf-c-i19/
-module load netcdf-fortran-i19/
+#module load devel icc ifort
+module load intel-cees-beta/
+module load mpich-cees-beta/
+module load netcdf-c-cees-beta/
+module load netcdf-fortran-cees-beta/
+module load m4-cees-beta/
 
 #module load intel-cees-beta/
 #module load gcc-cees-beta/
@@ -67,13 +69,13 @@ ATM_DYCORES_SRC_DIR=`cd ..;pwd`
 #
 # NOTE: Moved all the mkmf.template stuff here:
 # gcc-MPICH and gcc-openmpi, intel-mpich
-CC_spp=${CC}
+export CC_spp=${CC}
 #FC=$(dirname  ${MPICC})/mpifort
-FC=${MPIF90}
-CC=${MPICC}
-#LD=${MPIFC}
-LD=${FC}
-CXX=${MPICXX}
+export FC=${MPIF90}
+export CC=${MPICC}
+export LD=${MPIFC}
+#LD=$F90
+export CXX=${MPICXX}
 #
 ## intel-intel:
 ## note: binaries are like mpicc, mpiicc, mpicxx, mpiicpc, ... don't really know the difference (if any)
@@ -103,9 +105,9 @@ echo "*** FC: ${FC} :: ${FC} --version"
 MPI_PATH=$(dirname $(dirname $(which mpicc)))
 echo "**** MPI_PATH:: $MPI_PATH"
 # MPICH:
-MPI_CFLAGS=$(pkg-config --cflags ${MPI_PATH}/lib/pkgconfig/mpich.pc)
+MPI_CFLAGS="$(pkg-config --cflags ${MPI_PATH}/lib/pkgconfig/mpich.pc)"
 MPI_FFLAGS=$MPI_CFLAGS
-MPI_LIBS=$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc)
+MPI_LIBS="$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc)"
 #
 ##intel-oneapi-mpi
 #MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/impi.pc --cflags)
@@ -118,10 +120,11 @@ MPI_LIBS=$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc)
 #MPI_LIBS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --libs)
 #
 #export FFLAGS=" -O2 -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
-export FFLAGS=" -O2 $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+#export FFLAGS=" -O2 $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+export FFLAGS=" -i4 -r8 -fpp -O2 $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
 #  $(nc-config --cflags)
 #  $(nc-config --libs)
-export LIBS=" $(nc-config --flibs) $(nf-config --flibs) "
+export LIBS=" $(nc-config --flibs) $(nf-config --flibs) ${MPI_LIBS} -L/usr/lib64 -lm "
 export LDFLAGS=" ${LIBS}"
 export CFLAGS="-D__IFC ${MPI_CFLAGS} $(nc-config --cflags)"
 
