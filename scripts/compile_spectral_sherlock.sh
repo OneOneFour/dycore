@@ -14,9 +14,16 @@ module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_
 #
 module purge
 
+module load gcc/10.
+#
 #module load devel icc ifort
 module load intel-cees-beta/
+#module load intel-oneapi-mkl-cees-beta/
+#module load gcc-cees-beta/
+
 module load mpich-cees-beta/
+#module load intel-oneapi-mpi/
+
 module load netcdf-c-cees-beta/
 module load netcdf-fortran-cees-beta/
 module load m4-cees-beta/
@@ -28,10 +35,12 @@ module load m4-cees-beta/
 #module load intel-oneapi-mpi-cees-beta/
 #module load openmpi-cees-beta/
 #
+echo "*** Modules:"
+module list
 #
-COMP="intel19"
+#COMP="intel19"
 #COMP="gcc11"
-#COMP="intel202104"
+COMP="intel202104"
 #MPI="impi"
 MPI="mpich"
 #MPI="openmpi"
@@ -69,12 +78,13 @@ ATM_DYCORES_SRC_DIR=`cd ..;pwd`
 #
 # NOTE: Moved all the mkmf.template stuff here:
 # gcc-MPICH and gcc-openmpi, intel-mpich
+#export LD=${FC}
 export CC_spp=${CC}
 #FC=$(dirname  ${MPICC})/mpifort
 export FC=${MPIF90}
 export CC=${MPICC}
-export LD=${MPIFC}
-#LD=$F90
+#export LD=${MPIFC}
+export LD=ifort
 export CXX=${MPICXX}
 #
 ## intel-intel:
@@ -102,12 +112,13 @@ echo "*** CXX: ${CXX} :: `${CXX} --version`"
 echo "*** FC: ${FC} :: ${FC} --version"
 #
 #MPI_PATH=$(dirname $(dirname ${MPICC}))
-MPI_PATH=$(dirname $(dirname $(which mpicc)))
+export MPI_PATH=$(dirname $(dirname $(which mpicc)))
 echo "**** MPI_PATH:: $MPI_PATH"
 # MPICH:
-MPI_CFLAGS="$(pkg-config --cflags ${MPI_PATH}/lib/pkgconfig/mpich.pc)"
+MPI_CFLAGS="$(pkg-config --cflags ${MPI_PATH}/lib/pkgconfig/mpich.pc) "
 MPI_FFLAGS=$MPI_CFLAGS
-MPI_LIBS="$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc)"
+MPI_LIBS="$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc) -lmpifort "
+#MPI_LIBS="-L${MPI_PATH}/lib -lmpi -lmpifort "
 #
 ##intel-oneapi-mpi
 #MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/impi.pc --cflags)
@@ -124,7 +135,8 @@ MPI_LIBS="$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc)"
 export FFLAGS=" -i4 -r8 -fpp -O2 $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
 #  $(nc-config --cflags)
 #  $(nc-config --libs)
-export LIBS=" $(nc-config --flibs) $(nf-config --flibs) ${MPI_LIBS} -L/usr/lib64 -lm "
+# -L/usr/lib64 
+export LIBS="  ${MPI_LIBS} $(nc-config --flibs) $(nf-config --flibs) ${MPI_LIBS} -lm "
 export LDFLAGS=" ${LIBS}"
 export CFLAGS="-D__IFC ${MPI_CFLAGS} $(nc-config --cflags)"
 
