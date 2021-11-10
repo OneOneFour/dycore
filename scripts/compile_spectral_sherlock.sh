@@ -9,25 +9,45 @@
 # TODO: integrate compile_template_module dynamic compiler, MPI, etc. elements
 #
 module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_zen2-beta/linux-centos7-x86_64/Core
+#module use /scratch/users/myoder96/spack_dev/base/spack/share/spack/lmod_intel19/linux-centos7-x86_64/Core 
+#module use /scratch/users/myoder96/spack_dev/base/spack/share/spack/lmod_intel21/linux-centos7-x86_64/Core
 #
 module purge
-#module load intel-cees-beta/
-module load gcc-cees-beta/
+
+module load gcc/10.
+#
+#module load devel icc ifort
+module load intel-cees-beta/
+#module load intel-oneapi-mkl-cees-beta/
+#module load gcc-cees-beta/
 
 module load mpich-cees-beta/
+#module load intel-oneapi-mpi/
+
+module load netcdf-c-cees-beta/
+module load netcdf-fortran-cees-beta/
+module load m4-cees-beta/
+
+#module load intel-cees-beta/
+#module load gcc-cees-beta/
+
+#module load mpich-cees-beta/
 #module load intel-oneapi-mpi-cees-beta/
 #module load openmpi-cees-beta/
 #
+echo "*** Modules:"
+module list
 #
-COMP="gcc11"
-#COMP="intel202104"
+#COMP="intel19"
+#COMP="gcc11"
+COMP="intel202104"
 #MPI="impi"
-#MPI="mpich"
-MPI="openmpi"
+MPI="mpich"
+#MPI="openmpi"
 #
-module load netcdf-c-cees-beta/
-module load netcdf-fortran-cees-beta/
-#module load udunits/
+#module load netcdf-c-cees-beta/
+#module load netcdf-fortran-cees-beta/
+##module load udunits/
 #
 DO_CLEAN=1
 DO_MODULE=0
@@ -58,13 +78,14 @@ ATM_DYCORES_SRC_DIR=`cd ..;pwd`
 #
 # NOTE: Moved all the mkmf.template stuff here:
 # gcc-MPICH and gcc-openmpi, intel-mpich
-CC_spp=${CC}
+#export LD=${FC}
+export CC_spp=${CC}
 #FC=$(dirname  ${MPICC})/mpifort
-FC=${MPIF90}
-CC=${MPICC}
-#LD=${MPIFC}
-LD=${FC}
-CXX=${MPICXX}
+export FC=${MPIF90}
+export CC=${MPICC}
+#export LD=${MPIFC}
+export LD=ifort
+export CXX=${MPICXX}
 #
 ## intel-intel:
 ## note: binaries are like mpicc, mpiicc, mpicxx, mpiicpc, ... don't really know the difference (if any)
@@ -91,12 +112,13 @@ echo "*** CXX: ${CXX} :: `${CXX} --version`"
 echo "*** FC: ${FC} :: ${FC} --version"
 #
 #MPI_PATH=$(dirname $(dirname ${MPICC}))
-MPI_PATH=$(dirname $(dirname $(which mpicc)))
+export MPI_PATH=$(dirname $(dirname $(which mpicc)))
 echo "**** MPI_PATH:: $MPI_PATH"
 # MPICH:
-#MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/mpich.pc --cflags)
-#MPI_FFLAGS=$MPI_CFLAGS
-#MPI_LIBS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/mpich.pc --libs)
+MPI_CFLAGS="$(pkg-config --cflags ${MPI_PATH}/lib/pkgconfig/mpich.pc) "
+MPI_FFLAGS=$MPI_CFLAGS
+MPI_LIBS="$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc) -lmpifort "
+#MPI_LIBS="-L${MPI_PATH}/lib -lmpi -lmpifort "
 #
 ##intel-oneapi-mpi
 #MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/impi.pc --cflags)
@@ -104,15 +126,17 @@ echo "**** MPI_PATH:: $MPI_PATH"
 #MPI_LIBS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/impi.pc --libs)
 ##
 # OMPI
-MPI_FFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --cflags)
-MPI_CFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-c.pc --cflags)
-MPI_LIBS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --libs)
+#MPI_FFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --cflags)
+#MPI_CFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-c.pc --cflags)
+#MPI_LIBS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --libs)
 #
-
-export FFLAGS=" -O3 -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+#export FFLAGS=" -O2 -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+#export FFLAGS=" -O2 $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+export FFLAGS=" -i4 -r8 -fpp -O2 $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
 #  $(nc-config --cflags)
 #  $(nc-config --libs)
-export LIBS=" $(nc-config --flibs) $(nf-config --flibs) "
+# -L/usr/lib64 
+export LIBS="  ${MPI_LIBS} $(nc-config --flibs) $(nf-config --flibs) ${MPI_LIBS} -lm "
 export LDFLAGS=" ${LIBS}"
 export CFLAGS="-D__IFC ${MPI_CFLAGS} $(nc-config --cflags)"
 

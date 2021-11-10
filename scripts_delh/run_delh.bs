@@ -67,9 +67,11 @@ fi
 if [[ -z ${NPES} ]]; then NPES=8; fi
 #
 # Actual computations and data will happen in WORK_DIR:
-ROOT_DIR="`cd ..;pwd`"
-#ROOT_DIR="`pwd`"
-WORK_DIR="${ROOT_DIR}/workdir_${EXPERIMENT_NAME}_${GAUSS_HEIGHT}"
+#ROOT_DIR="`cd ..;pwd`"
+ROOT_DIR="`pwd`"
+#
+#WORK_DIR="${ROOT_DIR}/workdir_${EXPERIMENT_NAME}_${GAUSS_HEIGHT}"
+WORK_DIR="${ROOT_DIR}/workdir_yoda_${EXPERIMENT_NAME}_${GAUSS_HEIGHT}"
 
 #WORK_DIR="$SCRATCH/public/aditi/dycore/IP_iterations_Jul09"
 echo "WORK_DIR: ${WORK_DIR}"

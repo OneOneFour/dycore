@@ -6,6 +6,8 @@ postprocessing/
 exec_spectral.mazama/
 
 ._*
+*/.*
+bin/
 
 *.err
 *.out
