@@ -8,37 +8,46 @@
 #
 # TODO: integrate compile_template_module dynamic compiler, MPI, etc. elements
 #
-#module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_zen2-beta/linux-centos7-x86_64/Core
-module use /scratch/users/myoder96/spack_dev/base/spack/share/spack/lmod_intel19/linux-centos7-x86_64/Core 
+module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_zen2-beta/linux-centos7-x86_64/Core
+#module use /scratch/users/myoder96/spack_dev/base/spack/share/spack/lmod_intel19/linux-centos7-x86_64/Core 
 #
 module purge
 
-module load devel icc ifort
-module load intel-i19/
-module load mpich-i19/
-module load netcdf-c-i19/
-module load netcdf-fortran-i19/
+#
+# intel19 spack SW/modules on Sherlock (scratch)
+#module load devel icc ifort
+#module load intel-i19/
+#module load mpich-i19/
+#module load netcdf-c-i19/
+#module load netcdf-fortran-i19/
+#COMP="intel19"
 
+#module load gcc/9.
 #module load intel-cees-beta/
-#module load gcc-cees-beta/
+#COMP="intel202104"
+module load oneapi-cees-beta/
+COMP="oneapi202104"
 
-#module load mpich-cees-beta/
+#module load gcc-cees-beta/
+#COMP="gcc11"
+
+#module load gcc/9.
+
+module load mpich-cees-beta/
 #module load intel-oneapi-mpi-cees-beta/
 #module load openmpi-cees-beta/
 #
-#
-COMP="intel19"
-#COMP="gcc11"
-#COMP="intel202104"
 #MPI="impi"
 MPI="mpich"
 #MPI="openmpi"
 #
-#module load netcdf-c-cees-beta/
-#module load netcdf-fortran-cees-beta/
+module load netcdf-c-cees-beta/
+module load netcdf-fortran-cees-beta/
 ##module load udunits/
+module load python-cees-beta/
+module load gettext-cees-beta/
 #
-DO_CLEAN=1
+DO_CLEAN=0
 DO_MODULE=0
 # I don't actually know what version this is...
 VER=1.0.1
@@ -67,10 +76,11 @@ ATM_DYCORES_SRC_DIR=`cd ..;pwd`
 #
 # NOTE: Moved all the mkmf.template stuff here:
 # gcc-MPICH and gcc-openmpi, intel-mpich
-CC_spp=${CC}
+CC_spp=$CC
 #FC=$(dirname  ${MPICC})/mpifort
 FC=${MPIF90}
 CC=${MPICC}
+CXX=${MPICXX}
 #LD=${MPIFC}
 LD=${FC}
 CXX=${MPICXX}
@@ -95,17 +105,22 @@ CXX=${MPICXX}
 #LD=${FC}
 #CXX=$(dirname  $(which mpicc))/mpigxx
 #
-echo "*** COMPILERS: CC: ${CC} :: ${CXX} --version"
-echo "*** CXX: ${CXX} :: `${CXX} --version`"
-echo "*** FC: ${FC} :: ${FC} --version"
+module list
 #
+echo "*** COMPILERS: CC: ${CC} :: `${CXX} --version`"
+echo "*** CXX: ${CXX} :: `${CXX} --version`"
+echo "*** FC: ${FC} :: `${FC} --version`"
+echo "*** gcc: `which gcc` :: `gcc --version`"
+#
+#exit 43
+
 #MPI_PATH=$(dirname $(dirname ${MPICC}))
 MPI_PATH=$(dirname $(dirname $(which mpicc)))
 echo "**** MPI_PATH:: $MPI_PATH"
 # MPICH:
-MPI_CFLAGS=$(pkg-config --cflags ${MPI_PATH}/lib/pkgconfig/mpich.pc)
-MPI_FFLAGS=$MPI_CFLAGS
-MPI_LIBS=$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc)
+MPI_CFLAGS=" $(pkg-config --cflags ${MPI_PATH}/lib/pkgconfig/mpich.pc) "
+MPI_FFLAGS=" ${MPI_CFLAGS}  "
+MPI_LIBS=" $(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc) "
 #
 ##intel-oneapi-mpi
 #MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/impi.pc --cflags)
@@ -117,13 +132,17 @@ MPI_LIBS=$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc)
 #MPI_CFLAGS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-c.pc --cflags)
 #MPI_LIBS = $(pkg-config ${MPI_PATH}/lib/pkgconfig/ompi-fort.pc --libs)
 #
-#export FFLAGS=" -O2 -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
-export FFLAGS=" -O2 $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+#GCC
+#export FFLAGS=" -O2 -fPIC -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS} "
+export FFLAGS=" -O2 -fPIC $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+#
 #  $(nc-config --cflags)
 #  $(nc-config --libs)
-export LIBS=" $(nc-config --flibs) $(nf-config --flibs) "
+export LIBS=" $(nc-config --flibs) $(nc-config --libs) ${MPI_LIBS} "
 export LDFLAGS=" ${LIBS}"
-export CFLAGS="-D__IFC ${MPI_CFLAGS} $(nc-config --cflags)"
+export CFLAGS="-D__IFC -fPIC ${MPI_CFLAGS} $(nc-config --cflags)"
+#
+export CXXFLAGS=$CFLAGS
 
 ####
 #
@@ -152,7 +171,6 @@ mppnccombine=$ATM_DYCORES_SRC_DIR/bin/mppnccombine.$platform # path to executabl
 #-----------------------------------------------------
 # compile mppnccombine.c, needed only if $npes > 1
 # NOTE: don't use the MPI compiler for this...
-
 if [ ! -f $mppnccombine ]; then
 	${CC} -O -o $mppnccombine $(nc-config --cflags) $(nc-config --libs) ./postprocessing/mppnccombine.c
 	#
@@ -174,7 +192,13 @@ if [ -e $WORK_DIR ]; then
   exit 1
   #if [[ -e $WORK_DIR ]]; then rm -rf ${WORK_DIR}; fi
 fi
+#
+# if
 mkdir -p $WORK_DIR/INPUT $WORK_DIR/RESTART
+if [[ ! -f $template ]]; then
+  if [[ ! -d `dirname $template` ]]; then mkdir -p `dirname $template`; fi
+  touch $template
+fi
 #---------------------------------------------------
 # compile the model code and create executable
 cd $execdir
@@ -185,8 +209,9 @@ $mkmf -p fms.x -t $template -c "-Duse_libMPI -Duse_netCDF" -a $sourcedir $pathna
 if [[ ${DO_CLEAN} -eq 1 ]]; then
     make clean
 fi
+make clean
 # looks like parallel compilation breaks this...
-make -f Makefile
+make -j ${SLURM_CPUS_PER_TASK}
 #
 # continually getting a "make: warning:  Clock skew detected." warning, which might trigger this code?
 if [[ ! $? -eq 0 ]]; then
