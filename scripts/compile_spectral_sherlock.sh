@@ -9,29 +9,18 @@
 # TODO: integrate compile_template_module dynamic compiler, MPI, etc. elements
 #
 module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_zen2-beta/linux-centos7-x86_64/Core
-#module use /scratch/users/myoder96/spack_dev/base/spack/share/spack/lmod_intel19/linux-centos7-x86_64/Core 
 #
 module purge
-
 #
-# intel19 spack SW/modules on Sherlock (scratch)
-#module load devel icc ifort
-#module load intel-i19/
-#module load mpich-i19/
-#module load netcdf-c-i19/
-#module load netcdf-fortran-i19/
-#COMP="intel19"
-
-#module load gcc/9.
-#module load intel-cees-beta/
-#COMP="intel202104"
-module load oneapi-cees-beta/
-COMP="oneapi202104"
-
+module load gcc/9.
+module load intel-cees-beta/
+COMP="intel202104"
+#
+#module load oneapi-cees-beta/
+#COMP="oneapi202104"
+#
 #module load gcc-cees-beta/
 #COMP="gcc11"
-
-#module load gcc/9.
 
 module load mpich-cees-beta/
 #module load intel-oneapi-mpi-cees-beta/
@@ -44,10 +33,12 @@ MPI="mpich"
 module load netcdf-c-cees-beta/
 module load netcdf-fortran-cees-beta/
 ##module load udunits/
-module load python-cees-beta/
-module load gettext-cees-beta/
+#module load python-cees-beta/
+#module load gettext-cees-beta/
+#module load m4-cees-beta/
+
 #
-DO_CLEAN=0
+DO_CLEAN=1
 DO_MODULE=0
 # I don't actually know what version this is...
 VER=1.0.1
@@ -76,14 +67,15 @@ ATM_DYCORES_SRC_DIR=`cd ..;pwd`
 #
 # NOTE: Moved all the mkmf.template stuff here:
 # gcc-MPICH and gcc-openmpi, intel-mpich
-CC_spp=$CC
+if [[ -z ${CC} ]]; then CC=icc; fi
+#export LD=${FC}
+export CC_spp=${CC}
 #FC=$(dirname  ${MPICC})/mpifort
-FC=${MPIF90}
-CC=${MPICC}
-CXX=${MPICXX}
-#LD=${MPIFC}
-LD=${FC}
-CXX=${MPICXX}
+export FC=${MPIF90}
+export CC=${MPICC}
+#export LD=${MPIFC}
+export LD=${FC}
+export CXX=${MPICXX}
 #
 ## intel-intel:
 ## note: binaries are like mpicc, mpiicc, mpicxx, mpiicpc, ... don't really know the difference (if any)
@@ -115,12 +107,13 @@ echo "*** gcc: `which gcc` :: `gcc --version`"
 #exit 43
 
 #MPI_PATH=$(dirname $(dirname ${MPICC}))
-MPI_PATH=$(dirname $(dirname $(which mpicc)))
+export MPI_PATH=$(dirname $(dirname $(which mpicc)))
 echo "**** MPI_PATH:: $MPI_PATH"
 # MPICH:
-MPI_CFLAGS=" $(pkg-config --cflags ${MPI_PATH}/lib/pkgconfig/mpich.pc) "
-MPI_FFLAGS=" ${MPI_CFLAGS}  "
-MPI_LIBS=" $(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc) "
+#MPI_CFLAGS="$(pkg-config --cflags ${MPI_PATH}/lib/pkgconfig/mpich.pc) "
+MPI_CFLAGS="$(pkg-config --cflags mpich)"
+MPI_FFLAGS=$MPI_CFLAGS
+MPI_LIBS="$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc) -lmpifort "
 #
 ##intel-oneapi-mpi
 #MPI_CFLAGS=$(pkg-config ${MPI_PATH}/lib/pkgconfig/impi.pc --cflags)
@@ -134,11 +127,17 @@ MPI_LIBS=" $(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc) "
 #
 #GCC
 #export FFLAGS=" -O2 -fPIC -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS} "
-export FFLAGS=" -O2 -fPIC $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+#export FFLAGS=" -O2 -fPIC $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+##
+##  $(nc-config --cflags)
+##  $(nc-config --libs)
+#export LIBS=" $(nc-config --flibs) $(nc-config --libs) ${MPI_LIBS} "
 #
+export FFLAGS=" -i4 -r8 -fpp -fPIC -O2 $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
 #  $(nc-config --cflags)
 #  $(nc-config --libs)
-export LIBS=" $(nc-config --flibs) $(nc-config --libs) ${MPI_LIBS} "
+# -L/usr/lib64 
+export LIBS="  ${MPI_LIBS} $(nc-config --flibs) $(nf-config --flibs) ${MPI_LIBS} -lm "
 export LDFLAGS=" ${LIBS}"
 export CFLAGS="-D__IFC -fPIC ${MPI_CFLAGS} $(nc-config --cflags)"
 #
@@ -232,6 +231,7 @@ echo "DO_MODULE: ${DO_MODULE}"
 echo "Write module to: ${MODULE_PATH}/${VER}.lua"
 
 echo "*** *** Intentionally Exiting script *** ***"
+echo "*** *** This probably means it compiled successfully *** ***"
 exit 1
 
 

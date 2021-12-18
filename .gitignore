@@ -1,6 +1,7 @@
 # work output paths:
 workdir*/
 exec_*/
+postprocessing/
 
 exec_spectral.mazama/
 
