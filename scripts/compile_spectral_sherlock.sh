@@ -14,7 +14,7 @@ module use /home/groups/s-ees/share/cees/spack_cees/spack/share/spack/lmod_zen2_
 #
 module purge
 
-module load gcc/10.
+module load gcc/9.
 #
 #module load devel icc ifort
 module load intel-cees-beta/
@@ -24,6 +24,8 @@ module load intel-cees-beta/
 module load mpich-cees-beta/
 #module load intel-oneapi-mpi/
 
+module load hdf5-cees-beta/
+module load libfabric-cees-beta/
 module load netcdf-c-cees-beta/
 module load netcdf-fortran-cees-beta/
 module load m4-cees-beta/
@@ -50,7 +52,7 @@ MPI="mpich"
 ##module load udunits/
 #
 DO_CLEAN=1
-DO_MODULE=0
+DO_MODULE=1
 # I don't actually know what version this is...
 VER=1.0.1
 COMP_MPI="${COMP}_${MPI}"
@@ -63,10 +65,11 @@ COMP_MPI_MODS="${COMP}-${MPI}"
 PARTITION="serc"
 #
 PLATFORM="sh03_serc"
-TARGET_PATH="`cd ../;pwd`/bin"
+#TARGET_PATH="`cd ../;pwd`/bin"
+TARGET_PATH="/home/groups/s-ees/share/cees/software/no_arch/dycore/${VER}"
 #TARGET_PATH="${SCRATCH}/.local/software/DyCore/${COMP_MPI}/${VER}"
 TARGET_EXE_PATH="${TARGET_PATH}/exec"
-MODULE_PATH="/share/cees/modules/moduledeps/${COMP_MPI_MODS}/dycore"
+MODULE_PATH="/home/groups/s-ees/share/cees/modules/modulefiles/dycore"
 #
 # yoder:
 ATM_DYCORES_RUN_DIR=`cd ..;pwd`
@@ -132,13 +135,13 @@ MPI_LIBS="$(pkg-config --libs ${MPI_PATH}/lib/pkgconfig/mpich.pc) -lmpifort "
 #
 #export FFLAGS=" -O2 -fcray-pointer -fallow-argument-mismatch -Wall $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
 #export FFLAGS=" -O2 $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
-export FFLAGS=" -i4 -r8 -fpp -O2 $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
+export FFLAGS=" -i4 -r8 -fpp -O2 -fPIC $(nc-config --fflags) $(nf-config --fflags) ${MPI_FFLAGS}"
 #  $(nc-config --cflags)
 #  $(nc-config --libs)
 # -L/usr/lib64 
 export LIBS="  ${MPI_LIBS} $(nc-config --flibs) $(nf-config --flibs) ${MPI_LIBS} -lm "
 export LDFLAGS=" ${LIBS}"
-export CFLAGS="-D__IFC ${MPI_CFLAGS} $(nc-config --cflags)"
+export CFLAGS="-D__IFC -O2 -fPIC ${MPI_CFLAGS} $(nc-config --cflags)"
 
 ####
 #
@@ -216,16 +219,15 @@ cp fms.x ${TARGET_EXE_PATH}/
 cp -r $ATM_DYCORES_RUN_DIR/input ${TARGET_PATH}/
 cp ${mppnccombine} ${TARGET_EXE_PATH}/
 #
+
 # write a module script:
 echo "DO_MODULE: ${DO_MODULE}"
-#if [[ ${DO_MODULE} -eq 1 ]]; then
-echo "Write module to: ${MODULE_PATH}/${VER}.lua"
-
-echo "*** *** Intentionally Exiting script *** ***"
-exit 1
-
-
+if [[ ${DO_MODULE} -eq 1 ]]; then
+#echo "*** *** Intentionally Exiting script *** ***"
+#exit 1
 if [[ ! -d ${MODULE_PATH} ]]; then mkdir -p ${MODULE_PATH} ; fi
+
+echo "Write module to: ${MODULE_PATH}/${VER}.lua"
 #
 cat > ${MODULE_PATH}/${VER}.lua <<EOF
 -- -*- lua -*-
@@ -233,9 +235,10 @@ cat > ${MODULE_PATH}/${VER}.lua <<EOF
 prereq("${PREREQ_COMP}")
 prereq("${MPI_MOD_STR}")
 --
-depends_on("netcdf/")
-depends_on("netcdf-fortran/")
-depends_on("udunits/")
+depends_on("hdf5-cees-beta/")
+depends_on("libfabric-cees-beta/")
+depends_on("netcdf-c-cees-beta/")
+depends_on("netcdf-fortran-cees-beta/")
 --
 whatis("Name: dycore spectral, built from ${COMP_MPI} toolchain.")
 --
@@ -252,9 +255,9 @@ prepend_path("PATH", BIN_DIR)
 --  versions of the shared library.
 prepend_path("LD_LIBRARY_PATH", "/usr/lib64")
 EOF
-    #
-#fi
-
+    
+fi
+exit 1
 #
 # How to run a job...
 echo "Write an input script, copy"
