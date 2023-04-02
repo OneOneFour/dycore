@@ -1213,12 +1213,12 @@ module mpp_mod
     end function stderr
 
     function stdlog()
-      integer :: stdlog,istat
+      integer :: stdlog
       logical :: opened
       if( pe.EQ.root_pe )then
           inquire( file=trim(configfile), opened=opened )
           if( opened )then
-              call FLUSH(log_unit,istat)
+              call FLUSH(log_unit)
           else
               log_unit=get_unit()
               open( unit=log_unit, status='OLD', file=trim(configfile), position='APPEND', err=10 )
@@ -1247,7 +1247,7 @@ module mpp_mod
 ! </SUBROUTINE>
     subroutine mpp_exit()
 !to be called at the end of a run
-      integer :: i, j, k, n, nmax,istat
+      integer :: i, j, k, n, nmax
       real :: t, tmin, tmax, tavg, tstd
       real :: m, mmin, mmax, mavg, mstd
       real :: t_total
@@ -1266,7 +1266,7 @@ module mpp_mod
                    write( stdout(),'(a)' )'   ... see mpp_clock.out.#### for details on individual PEs.'
               write( stdout(),'(/32x,a)' ) '          tmin          tmax          tavg          tstd  tfrac grain pemin pemax'
           end if
-          call FLUSH( stdout(),istat )
+          call FLUSH( stdout() )
           call mpp_sync()
           do i = 1,clock_num
              if( .NOT.ANY(peset(clocks(i)%peset_num)%list(:).EQ.pe) )cycle
@@ -2707,7 +2707,6 @@ module mpp_mod
       character(len=*), intent(in), optional :: errormsg
       character(len=256) :: text
       logical :: opened
-      integer :: istat
       
       if( .NOT.module_is_initialized )call ABORT()
 
@@ -2731,7 +2730,7 @@ module mpp_mod
       case default
           write( stderr(),'(/a/)' )trim(text)
           if( errortype.EQ.FATAL .OR. warnings_are_fatal )then
-              call FLUSH(stdout(),istat)
+              call FLUSH(stdout())
 #ifdef sgi_mipspro
               call TRACE_BACK_STACK_AND_PRINT()
 #endif
@@ -3190,7 +3189,7 @@ module mpp_mod
     integer, parameter :: n=1048576
     real, allocatable, dimension(:) :: a, b, c
     integer :: tick, tick0, ticks_per_sec, id
-    integer :: i, j, k, l, m,istat
+    integer :: i, j, k, l, m
     real :: dt
 
     call mpp_init()
@@ -3284,7 +3283,7 @@ module mpp_mod
 
 !pelist check
     call mpp_sync()
-    call flush(stdout(),istat)
+    call flush(stdout())
     if( npes.GE.2 )then
         if( pe.EQ.root )print *, 'Test of pelists: bcast, sum and max using PEs 0...npes-2 (excluding last PE)'
         call mpp_declare_pelist( (/(i,i=0,npes-2)/) )
