@@ -898,12 +898,12 @@ module mpp_io_mod
 ! </SUBROUTINE>
 
     subroutine mpp_io_exit()
-      integer :: unit,istat
+      integer :: unit
 
       if( .NOT.module_is_initialized )call mpp_error( FATAL, 'MPP_IO_EXIT: must first call mpp_io_init.' )
 !close all open fortran units
       do unit = unit_begin,unit_end
-         if( mpp_file(unit)%opened )call FLUSH(unit,istat)
+         if( mpp_file(unit)%opened )call FLUSH(unit)
       end do
       call mpp_sync()
       do unit = unit_begin,unit_end
