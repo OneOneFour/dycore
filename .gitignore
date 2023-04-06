@@ -1,14 +1,13 @@
 # work output paths:
 workdir*/
-exec_*/
+exec*/
 postprocessing/
 
-exec_spectral.mazama/
 
+.cppdefs
 ._*
 */.*
 bin/
-
 *.err
 *.out
 data/
