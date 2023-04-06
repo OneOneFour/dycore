@@ -16,7 +16,6 @@ build/
 ._*
 */.*
 bin/
-
 *.err
 *.out
 data/
