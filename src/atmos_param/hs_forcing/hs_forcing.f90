@@ -392,7 +392,7 @@ real, intent(in),  dimension(:,:,:), optional :: mask
         !print*,'cycle ',time_in_days
         As=max(0.0, sin(2*3.1416*(time_in_days-180.)/360.))
         An=max(0.0, sin(2*3.1416*time_in_days/360.))
-        print*,As
+        !print*,As
         w(:,:) = 0.5 * (As*(1-tanh((lat(:,:)+50*3.1416/180)/(10*3.1416/180)))   &
                        +An*(1+tanh((lat(:,:)-50*3.1416/180)/(10*3.1416/180))))
         else
