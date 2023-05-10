@@ -3,7 +3,7 @@ workdir*/
 exec*/
 postprocessing/
 
-
+.vscode
 .cppdefs
 ._*
 */.*
