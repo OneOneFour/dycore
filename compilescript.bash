@@ -6,6 +6,8 @@ FC=mpifort
 LD=mpifort
 CXX=mpicxx
 
+set -e 
+
 if [[ ! $($CC -show | grep gcc) ]]; then 
     echo "mpicc is not present OR is not compiled to use gcc";
 fi;
@@ -24,7 +26,7 @@ mkdir $execLoc;
 
 cd $execLoc;
 
-gcc -O -o mppnccombine.apple  $(nc-config --cflags) $(nc-config --libs) $baseDir/postprocessing/mppnccombine.c;
+clang -g -O3 -o mppnccombine.apple  $(nc-config --cflags) $(nc-config --libs) $baseDir/postprocessing/mppnccombine.c;
 
 
 echo "copying file";
@@ -45,7 +47,8 @@ echo "dycore compilation";
 $baseDir/bin/mkmf -p dycore -t $baseDir/bin/mkmf.template.apple -c"-Duse_libMPI -Duse_netCDF -DgFortran" -a $baseDir/src $baseDir/input/spectral_pathnames;
 echo "Beginning make";
 make;
-rm -f *.o;
-rm -f *.mod;
+dsymutil dycore -o dycore.dSYM;
+rm *.o;
+rm *.mod;
 mkdir RESTART;
 echo "done";
