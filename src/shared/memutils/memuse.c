@@ -26,7 +26,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 */
-#if defined(__sgi) || defined(__aix) || defined(__IFC) || defined(__PGI) || __APPLE__
+#if defined(__sgi) || defined(__aix) || defined(__IFC) || defined(__PGI) || __APPLE__ || defined(__linux)
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
