@@ -34,5 +34,5 @@ Stage: builder
   LD_LIBRARY_PATH=/opt/netcdf-c/lib:/opt/hdf5/lib:/opt/netcdf-fortran/lib:/opt/io_libs/lib:${LD_LIBRARY_PATH}
 
 %runscript
-    ulimt -s unlimited
+    ulimit -s unlimited
     /opt/dycore/build/dycore
