@@ -24,10 +24,10 @@ Stage: builder
  mkmf=/opt/dycore/bin/mkmf
  sourcedir=/opt/dycore/src
 
- ${mkmf} -p dycore -t /opt/dycore/bin/mkmf.template.apple -c"-Duse_libMPI -Duse_netCDF -DgFortran" -a /opt/dycore/src /opt/dycore/input/spectral_pathnames;
+ ${mkmf} -p dycore -t /opt/dycore/bin/mkmf.template.singularity -c"-Duse_libMPI -Duse_netCDF -DgFortran" -a /opt/dycore/src /opt/dycore/input/spectral_pathnames;
  make -f Makefile clean
  make -f Makefile 
- chmod +x /opt/MiMA/build/dycore
+ chmod +x /opt/dycore/build/dycore
 
 %environment
   PATH=/opt/netcdf-fortran/bin:/opt/netcdf-c/bin:/opt/intel/oneapi/mpi/latest/bin:/opt/intel/oneapi/compiler/latest/linux/bin/intel64:${PATH}
