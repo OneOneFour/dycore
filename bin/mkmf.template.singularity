@@ -1,7 +1,5 @@
-CC="mpiicc"
-MPICC="mpiicc"
-MPICCX="mpicxx"
+CC="mpiicx"
+MPICC="mpiicx"
 MPIFC="mpiifort"
 FC="mpiifort"
-CXX="mpicxx"
 LD='mpiifort'
