@@ -15,7 +15,7 @@ build/
 .cppdefs
 ._*
 */.*
-bin/
+
 *.err
 *.out
 data/
