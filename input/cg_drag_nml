@@ -5,4 +5,4 @@
     dc=1.2,
     source_level_pressure = 315.e+02,
     damp_level_pressure = 0.85e+02,
-    cg_drag_freq = 0 /
+    cg_drag_freq = 21600 /

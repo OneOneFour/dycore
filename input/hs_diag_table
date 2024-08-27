@@ -4,23 +4,12 @@
 "atmos_daily",    24, "hours", 1, "days", "time",
 "atmos_average",  -1, "hours", 1, "days", "time",
 #diagnostic field entries.
- "dynamics",    "ps",             "ps",           "atmos_daily",    "all", .false., "none", 2,
- "dynamics",    "height",         "height",         "atmos_daily",    "all", .false., "none", 2,
  "dynamics",    "ucomp",          "ucomp",          "atmos_daily",    "all", .false., "none", 2,
  "dynamics",    "vcomp",          "vcomp",          "atmos_daily",    "all", .false., "none", 2,
- "dynamics",    "temp",           "temp",           "atmos_daily",    "all", .false., "none", 2,
- "dynamics",    "omega",          "omega",          "atmos_daily",    "all", .false., "none", 2,
- "dynamics",    "bk",             "bk",             "atmos_daily",    "all", .false., "none", 2, 
- "dynamics",    "vor",            "vor",            "atmos_daily",    "all", .false., "none", 2,
- "dynamics",    "bk",             "bk",             "atmos_average",  "all", .false., "none", 2,
- "dynamics",    "pk",             "pk",             "atmos_average",  "all", .false., "none", 2,
- "dynamics",    "zsurf",          "zsurf",          "atmos_average",  "all", .false., "none", 2,
- "dynamics",    "ps",             "ps",             "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "slp",            "slp",            "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "ucomp",          "ucomp",          "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "vcomp",          "vcomp",          "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "temp",           "temp",           "atmos_average",  "all", .true.,  "none", 2,
- "dynamics",    "omega",          "omega",          "atmos_average",  "all", .true.,  "none", 2,
+"dynamics",    "temp",          "temp",          "atmos_daily",    "all", .false., "none", 2,
+"dynamics",    "height",          "height",          "atmos_daily",    "all", .false., "none", 2,
+"cg_drag_king",    "gwfu_cgwd",         "gwfu_cgwd",          "atmos_daily",    "all", .false., "none", 2,
+"cg_drag_king",    "gwfv_cgwd",          "gwfv_cgwd",          "atmos_daily",    "all", .false., "none", 2,
 
 #=============================================================================================
 #
