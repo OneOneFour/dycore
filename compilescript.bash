@@ -26,7 +26,7 @@ mkdir $execLoc;
 
 cd $execLoc;
 
-clang -g -O3 -o mppnccombine.apple  $(nc-config --cflags) $(nc-config --libs) $baseDir/postprocessing/mppnccombine.c;
+clang -g -O2 -o mppnccombine.apple  $(nc-config --cflags) $(nc-config --libs) $baseDir/postprocessing/mppnccombine.c;
 
 
 echo "copying file";
