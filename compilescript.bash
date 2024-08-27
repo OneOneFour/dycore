@@ -40,7 +40,7 @@ cat > input.nml <<EOF
 &spectral_init_cond_nml initial_temperature = 275.0, initial_perturbation = 2.001e-7 /
 EOF
 cat $baseDir/input/spectral_namelist >> input.nml
-
+cat $baseDir/input/cg_drag_nml >> input.nml
 
 echo "dycore compilation";
 
@@ -51,4 +51,6 @@ dsymutil dycore -o dycore.dSYM;
 rm *.o;
 rm *.mod;
 mkdir RESTART;
+mkdir INPUT;
+cp $baseDir/input/cg_drag_king_params.nc INPUT/cg_drag_king_params.nc;
 echo "done";

@@ -21,7 +21,6 @@
  "dynamics",    "vcomp",          "vcomp",          "atmos_average",  "all", .true.,  "none", 2,
  "dynamics",    "temp",           "temp",           "atmos_average",  "all", .true.,  "none", 2,
  "dynamics",    "omega",          "omega",          "atmos_average",  "all", .true.,  "none", 2,
- "hs_forcing",  "teq",            "teq",            "atmos_average",  "all", .true.,  "none", 2,
 
 #=============================================================================================
 #
