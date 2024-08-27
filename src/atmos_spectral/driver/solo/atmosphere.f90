@@ -214,7 +214,7 @@ subroutine atmosphere(Time,timespinup)
 
     
     
-    call cg_drag_king_calc(is,js,rad_lat_2d(:,:),p_full(:,:,:),z_full(:,:,:),&
+    call cg_drag_king_calc(1,1,rad_lat_2d(:,:),p_full(:,:,:),z_full(:,:,:),&
                             tg(:,:,:,previous),ug(:,:,:,previous),vg(:,:,:,previous),&
                             Time,delta_t,gwfc_x(:,:,:),gwfc_y(:,:,:))
     
