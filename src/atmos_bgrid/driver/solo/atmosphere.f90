@@ -57,7 +57,7 @@ use              fms_mod, only: file_exist, open_namelist_file, &
 use bgrid_change_grid_mod, only: change_grid, TEMP_GRID, WIND_GRID
 use bgrid_horiz_mod      , only: horiz_grid_type
 use bgrid_vert_mod       , only: vert_grid_type, &
-                                 compute_pres_full, compute_pres_half
+                                 compute_pres_full, compute_pres_half, compute_height
 use bgrid_halo_mod       , only: update_halo, UWND, VWND, TEMP, &
                                  NORTH, EAST, WEST, SOUTH
 use hs_forcing_mod       , only: hs_forcing_init, hs_forcing
@@ -323,6 +323,7 @@ type   (prog_var_type),intent(inout) :: Var_dt
                                         p_full(1:ix,1:jx,:))
        call compute_pres_half (Vgrid, pssl_new(1:ix,1:jx), &
                                         p_half(1:ix,1:jx,:))
+
 
 
        u_dt(1:ix,1:jx,:) = uh_dt(is:ie,js:je,:)
