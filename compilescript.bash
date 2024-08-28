@@ -49,7 +49,8 @@ echo "Beginning make";
 make;
 dsymutil dycore -o dycore.dSYM;
 rm *.o;
-rm *.mod;
+mkdir -p $baseDir/include
+mv *.mod $baseDir/include;
 mkdir RESTART;
 mkdir INPUT;
 cp $baseDir/input/cg_drag_king_params.nc INPUT/cg_drag_king_params.nc;
