@@ -678,7 +678,7 @@ module cg_drag_king_mod
 
                                 ! has the wave broken at this level?
                                 Foc = B0(n)/(c0mu(k))**3 - fp0
-                                if ((Foc >= 0.0) .or. (c0mu0(k)*c0mu(k) <= 0.0)) then
+                                if ((Foc >= 0.0) .or. (c0mu0(n)*c0mu(k) <= 0.0)) then
                                     msk(n) = 0
                                     if (k < iz0) then
                                         fm = fm + B0(n)

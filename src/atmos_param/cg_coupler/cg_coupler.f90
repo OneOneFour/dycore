@@ -47,7 +47,7 @@ module cg_coupler_mod
         endif
 
         !! check if both methods are requested?  
-        if (do_king_cg .and. do_king_cg) then
+        if (do_king_cg .and. do_ref_cg) then
             call error_mesg(mod_name,'Both do_ref_cg and do_king_cg are set to true. Only one can be true at a time',FATAL)
         end if
 
