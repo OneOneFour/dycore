@@ -36,7 +36,7 @@ use           transforms_mod, only: trans_grid_to_spherical, trans_spherical_to_
 use         time_manager_mod, only: time_type, set_time, get_time, &
                                     operator( + ), operator( - ), operator( < )
 
-use     press_and_geopot_mod, only: compute_pressures_and_heights
+use     press_and_geopot_mod, only: compute_pressures_and_heights,pressure_variables
 
 use    spectral_dynamics_mod, only: spectral_dynamics_init, spectral_dynamics, spectral_dynamics_end, &
                                     get_num_levels, complete_init_of_tracers, get_axis_id, spectral_diagnostics, &
@@ -46,7 +46,7 @@ use          tracer_type_mod, only: tracer_type
 
 use           hs_forcing_mod, only: hs_forcing_init, hs_forcing
 
-use      cg_drag_king_mod, only:  cg_drag_king_init, cg_drag_king_calc, cg_drag_king_end
+use      cg_coupler_mod, only: cg_coupler_init,cg_coupler_calc,cg_coupler_end
 
 use        field_manager_mod, only: MODEL_ATMOS
 
@@ -72,7 +72,7 @@ public :: atmosphere_init, atmosphere, atmosphere_end
 integer, parameter :: num_time_levels = 2
 integer :: is, ie, js, je, num_levels, num_tracers, nhum
 logical :: dry_model
-real, allocatable,dimension(:) :: lon_boundaries, lat_boundaries
+
 real, pointer, dimension(:,:,:) :: p_half => NULL(), p_full => NULL()
 real, pointer, dimension(:,:,:) :: z_half => NULL(), z_full => NULL()
 
@@ -107,7 +107,6 @@ contains
 subroutine atmosphere_init(Time_init, Time, Time_step_in)
 
 type (time_type), intent(in)  :: Time_init, Time, Time_step_in
-real, allocatable,dimension(:) :: pref ! p_full levels + plus psg level for cg_drag_king
 real :: sea_level_pressure
 integer :: seconds, days
 integer :: j, ierr, io
@@ -139,12 +138,12 @@ allocate (dt_tg      (is:ie, js:je, num_levels))
 allocate (gwfc_x     (is:ie, js:je, num_levels))
 allocate (gwfc_y     (is:ie, js:je, num_levels))
 allocate (dt_tracers (is:ie, js:je, num_levels, num_tracers))
-allocate(lon_boundaries(ie-is+2), lat_boundaries(je-js+2))
+
 allocate (deg_lat    (       js:je))
 allocate (rad_lat    (       js:je))
 allocate (rad_lat_2d (is:ie, js:je))
 
-call get_grid_boundaries(lon_boundaries,lat_boundaries)
+
 
 dt_psg = 0.
 dt_ug  = 0.
@@ -162,12 +161,8 @@ enddo
 
 call hs_forcing_init(get_axis_id(), Time)
 
-call get_reference_sea_level_press(sea_level_pressure)
-allocate (pref(num_levels+1))
-pref(1:num_levels) = p_full(1,1,1:num_levels)
-pref(num_levels+1) = sea_level_pressure
 
-call cg_drag_king_init(lon_boundaries,lat_boundaries,pref,Time,get_axis_id()) ! TODO: this 
+call cg_coupler_init(Time,get_axis_id()) !! TODO
 call complete_init_of_tracers(tracer_attributes, previous, current, grid_tracers)
 
 module_is_initialized = .true.
@@ -214,7 +209,7 @@ subroutine atmosphere(Time,timespinup)
 
     
     
-    call cg_drag_king_calc(1,1,rad_lat_2d(:,:),p_full(:,:,:),z_full(:,:,:),&
+    call cg_coupler_calc(1,1,rad_lat_2d(:,:),p_full(:,:,:),z_full(:,:,:),&
                             tg(:,:,:,previous),ug(:,:,:,previous),vg(:,:,:,previous),&
                             Time,delta_t,gwfc_x(:,:,:),gwfc_y(:,:,:))
     
@@ -262,7 +257,7 @@ if(.not.module_is_initialized) return
 
 deallocate (dt_psg, dt_ug, dt_vg, dt_tg, dt_tracers)
 deallocate (deg_lat, rad_lat, rad_lat_2d)
-call cg_drag_king_end
+call cg_coupler_end
 !call hs_forcing_end
 call spectral_dynamics_end(previous, current, ug, vg, tg, psg, wg_full, tracer_attributes, &
                            grid_tracers, z_full, z_half, p_full, p_half)
