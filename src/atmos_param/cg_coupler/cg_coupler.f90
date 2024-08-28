@@ -4,7 +4,7 @@ module cg_coupler_mod
     use cg_drag_king_mod, only: cg_drag_king_init,cg_drag_king_calc,cg_drag_king_end
     use cg_drag_ref_mod, only: cg_drag_ref_init,cg_drag_ref_calc,cg_drag_ref_end
     use transforms_mod, only: get_grid_boundaries,get_grid_domain
-    use spectral_dynamics_mod, only: get_reference_sea_level_press
+    use spectral_dynamics_mod, only: get_reference_sea_level_press,get_num_levels
     use press_and_geopot_mod, only: pressure_variables
 
     !! Coupler for Gravity wave methods. Allows hot switching between cg_drag_ref and cg_drag_king
@@ -34,7 +34,7 @@ module cg_coupler_mod
         real, allocatable,dimension(:) :: lonb, latb
         real,allocatable,dimension(:) :: pref
 
-
+        call get_num_levels(num_levels)
 
         if (file_exist('input.nml')) then
             unit = open_namelist_file()
