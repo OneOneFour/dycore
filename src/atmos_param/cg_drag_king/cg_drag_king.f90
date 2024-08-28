@@ -225,7 +225,6 @@ module cg_drag_king_mod
                 damp_level(i,j) = klevel_of_damp
             enddo
         enddo 
-
         source_level = min(source_level,kmax-1)
         damp_level = min(damp_level,kmax)
 
@@ -618,6 +617,8 @@ module cg_drag_king_mod
                 
                 iz0 = source_level(i+is-1,j+js-1)
                 iztop = damp_level(i+is-1,j+js-1)
+                
+
                 ampl = source_amp(i+is-1,j+js-1)
                 cw = half_width(i+is-1,j+js-1)
                 Bsum = 0.
