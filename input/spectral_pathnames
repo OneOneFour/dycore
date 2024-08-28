@@ -1,4 +1,6 @@
 atmos_param/hs_forcing/hs_forcing.f90
+atmos_param/cg_drag_ref/cg_drag_ref.f90
+atmos_param/cg_coupler/cg_coupler.f90
 atmos_param/cg_drag_king/cg_drag_king.f90
 atmos_shared/vert_advection/vert_advection.f90
 atmos_solo/atmos_model.f90
