@@ -354,7 +354,7 @@ module cg_drag_ref_mod
             unit =  open_namelist_file ( )
             ierr=1; do while (ierr /= 0)
             read (unit, nml=cg_drag_ref_nml, iostat=io, end=10)
-            ierr = check_nml_error (io, 'cg_drag_nml')
+            ierr = check_nml_error (io, 'cg_drag_ref_nml')
             enddo
     10      call close_file (unit)
           endif
