@@ -2,7 +2,7 @@
 workdir*/
 exec_*/
 postprocessing/
-
+exec*/
 exec_spectral.mazama/
 
 ._*
