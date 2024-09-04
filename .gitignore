@@ -4,7 +4,7 @@ exec_*/
 postprocessing/
 exec*/
 exec_spectral.mazama/
-
+.vscode
 ._*
 */.*
 bin/
