@@ -5,7 +5,7 @@ target_sources(dycore PRIVATE
     diag_manager/diag_output.f90
     fft/fft.F90
     fft/fft99.f90
-    field_manager/field_manager.f90
+    field_manager/field_manager.F90
     field_manager/parse.inc
     fms/fms.f90
     fms/fms_io.f90
