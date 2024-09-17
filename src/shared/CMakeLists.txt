@@ -8,7 +8,7 @@ target_sources(dycore PRIVATE
     field_manager/field_manager.F90
     field_manager/parse.inc
     fms/fms.f90
-    fms/fms_io.f90
+    fms/fms_io.F90
     fms/read_data_2d.inc
     fms/read_data_3d.inc 
     fms/read_data_4d.inc 
