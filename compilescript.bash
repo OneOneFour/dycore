@@ -1,7 +1,7 @@
 cwd=$(pwd);
 #--------------------------------------------------------------------------------------------------------
 # define variables
-platform="apple"
+platform="gnu"
 template="mkmf.template.$platform"    # path to template for your platform
 mkmf="$cwd/bin/mkmf"                           # path to executable mkmf
 sourcedir="$cwd/src"                           # path to directory containing model source code
@@ -45,7 +45,7 @@ mkdir $execdir;
 
 cd $execdir;
 
-$CC -g -O2 -o mppnccombine.${platform}  $(nc-config --cflags) $(nc-config --libs) $mppnccombinesrc;
+$CC -g -O2 -o mppnccombine.${platform}  $(nc-config --cflags)  $mppnccombinesrc $(nc-config --libs);
 
 # -----------------------------------------------------------------------------------------------
 # Create Input Files 

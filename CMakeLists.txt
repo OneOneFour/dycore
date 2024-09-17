@@ -8,6 +8,9 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
+endif()
 
 add_executable(dycore)
 add_library(dycore_c)
@@ -20,7 +23,7 @@ target_compile_definitions(dycore PRIVATE use_libMPI use_netCDF gFortran)
 # Find MPI
 find_package(MPI REQUIRED)
 target_link_libraries(dycore PRIVATE MPI::MPI_Fortran)
-
+target_link_libraries(dycore_c PRIVATE MPI::MPI_C)
 
 # Find NetCDF
 find_package(NetCDF REQUIRED COMPONENTS C Fortran)
@@ -33,6 +36,10 @@ target_link_libraries(dycore PRIVATE OpenMP::OpenMP_Fortran )
 
 if(NOT CMAKE_Fortran_COMPILER)
     set(CMAKE_Fortran_COMPILER "gfortran")
+endif()
+if(MPI_Fortran_COMPILER)
+    set(CMAKE_Fortran_COMPILER ${MPI_Fortran_COMPILER})
+    message(STATUS "Using MPI Fortran compiler: ${MPI_Fortran_COMPILER}")   
 endif()
 
 
@@ -64,3 +71,8 @@ add_subdirectory(src/atmos_solo)
 add_subdirectory(src/atmos_spectral)
 add_subdirectory(src/shared)
 target_link_libraries(dycore PRIVATE dycore_c)
+install(TARGETS dycore mppnccombine RUNTIME DESTINATION .) 
+install(FILES input/hs_diag_table DESTINATION . RENAME diag_table)
+install(FILES input/spectral_field_table DESTINATION . RENAME field_table)
+install(DIRECTORY DESTINATION RESTART)
+install(FILES input/input.spectral.nml DESTINATION . RENAME input.nml)  
