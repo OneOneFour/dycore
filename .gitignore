@@ -9,6 +9,7 @@ exec_spectral.mazama/
 */.*
 bin/
 include/
+build/
 
 .vscode
 .cppdefs
