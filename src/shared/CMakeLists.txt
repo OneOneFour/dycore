@@ -3,8 +3,8 @@ target_sources(dycore PRIVATE
     diag_manager/diag_axis.f90
     diag_manager/diag_manager.f90
     diag_manager/diag_output.f90
-    fft/fft.F90
     fft/fft99.f90
+    fft/fft.F90
     field_manager/field_manager.F90
     field_manager/parse.inc
     fms/fms.f90
