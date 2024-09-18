@@ -1,0 +1,1 @@
+This directory is not used anymore since switching to the CMake Build System. The `mkmf` perl script is kept for backwards compatibility with older build systems.
