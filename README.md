@@ -1,21 +1,15 @@
-## Dycore Apple Silicon Building
+# Dry Dynamical Core
+By default builds the spectral dynamical core solver. There seems to be other code for solving on a B-Grid and solving the shallow water version of the system. 
 
-### Requirements
-* homebrew
-* MacOS SDK installed on system (preferably via XCode)
+Use CMake to build the project, tested and works on Sherlock (both GNU/Intel version) as well as on MacOS locally and within a docker container. 
 
+## Compilation
+First create CMake Build Files. To build for release (which enables hardware + code optimizations run):
+```
+cmake -S . -B build/ -DCMAKE_BUILD_TYPE=Release
+cmake --build build/
+cmake --install build/
+```
+In this mode, cmake will automatically detect the compilers that are available as well as the MPI + NetCDF libraries that are available. Manually setting the environment variables `NETCDF_Fortran_ROOT` and `NETCDF_C_ROOT` will help you out if CMake is not able to find NetCDF for some reason. 
+After compilation + installation, an executable will be placed in a new directory called `exec` alongside the input fields needed to run the dynamical core. 
 
-### Homebrew Requirements 
-* hwloc
-* mpich 
-** Needs to be recompiled for gcc ** 
-* netcdf
-* netcdf-cxx
-* netcdf-fortran
-* gcc (i've only been able to get it working with gcc for now if LLVM has a fortran compiler for mac then by all means give it a shot)
-
-To check `gcc` make sure to run `gcc-12 --version` in the command line and check it is actually calling gcc and `clang` (for some dumb reason macOS symlinks )
-
-### Build
-
-To build should 🤞 be a case of just executing `bash compilescript.sh` with the binary created with an directory called `exec.apple`. The building process should take no more than a few minutes to complete. 
