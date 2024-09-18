@@ -7,7 +7,7 @@ Stage: builder
   ./bin /opt/dycore/bin
   ./input /opt/dycore/input
   ./postprocessing /opt/dycore/postprocessing
-
+  ./CMakeLists.txt /opt/dycore/CMakeLists.txt
 %post 
   cmake -S /opt/dycore -B /opt/dycore/build
   cmake --build  /opt/dycore/build
