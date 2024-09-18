@@ -10,7 +10,7 @@ Stage: builder
   ./CMakeLists.txt /opt/dycore/CMakeLists.txt
   ./cmake /opt/dycore/cmake
 %post 
-  cmake -S /opt/dycore -B /opt/dycore/build
+  cmake -S /opt/dycore -B /opt/dycore/build -DCMAKE_BUILD_TYPE=Release
   cmake --build  /opt/dycore/build
   cmake --install /opt/dycore/build
   chmod +x /opt/dycore/exec/dycore
