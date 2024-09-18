@@ -1,0 +1,24 @@
+Bootstrap: docker
+From: robcking/eddy-builder
+Stage: builder
+
+%files
+  ./src /opt/dycore/src
+  ./bin /opt/dycore/bin
+  ./input /opt/dycore/input
+  ./postprocessing /opt/dycore/postprocessing
+  ./CMakeLists.txt /opt/dycore/CMakeLists.txt
+  ./cmake /opt/dycore/cmake
+%post 
+  cmake -S /opt/dycore -B /opt/dycore/build -DCMAKE_BUILD_TYPE=Release
+  cmake --build  /opt/dycore/build
+  cmake --install /opt/dycore/build
+  chmod +x /opt/dycore/exec/dycore
+
+%environment
+  PATH=/opt/netcdf-fortran/bin:/opt/netcdf-c/bin:/opt/intel/oneapi/mpi/latest/bin:/opt/intel/oneapi/compiler/latest/linux/bin/intel64:${PATH}
+  LD_LIBRARY_PATH=/opt/netcdf-c/lib:/opt/hdf5/lib:/opt/netcdf-fortran/lib:/opt/io_libs/lib:${LD_LIBRARY_PATH}
+
+%runscript
+  ulimit -s unlimited
+  /opt/dycore/exec/dycore
