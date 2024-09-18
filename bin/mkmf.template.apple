@@ -1,8 +1,0 @@
-CC=mpicc
-FC=mpifort
-LD=mpifort
-CXX=mpicxx
-
-FFLAGS=-g -O3 -fallow-argument-mismatch -fbacktrace -fdefault-real-8 -fdefault-double-8 -fcray-pointer -fallow-invalid-boz -fno-range-check -ffree-line-length-none -I/opt/homebrew/Cellar/mpich/4.1.2/include -I/opt/homebrew/lib -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/opt/homebrew/Cellar/netcdf-fortran/4.6.1/include -I/opt/homebrew/Cellar/netcdf-fortran/4.6.1/include -I/opt/homebrew/Cellar/netcdf/4.9.2_1/include -I/opt/homebrew/Cellar/udunits/2.2.28/include
-CFLAGS=-pthread -g -O3 -I/opt/homebrew/Cellar/mpich/4.2.2/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -I/opt/homebrew/Cellar/netcdf/4.9.2_1/include -I/opt/homebrew/Cellar/netcdf-fortran/4.6.1/include -g -Wall -Wno-unused-variable -Wno-unused-parameter -I/opt/homebrew/Cellar/udunits/2.2.28/include
-LDFLAGS=-g -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib -L/opt/homebrew/lib -F/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks -L/opt/homebrew/Cellar/mpich/4.2.2/lib -lmpi -lpmpi -lpthread -lhwloc -lpthread -ldl -lmpifort -pthread -L/opt/homebrew/Cellar/netcdf-fortran/4.6.1/lib -lnetcdff -lnetcdf -lnetcdf -L/opt/homebrew/Cellar/netcdf/4.9.2_1/lib -lnetcdf -L/opt/homebrew/Cellar/udunits/2.2.28/lib/ -ludunits2
