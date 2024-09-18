@@ -64,12 +64,17 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
     set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp -fallow-argument-mismatch -fbacktrace -fdefault-real-8 -fdefault-double-8 -fcray-pointer -fallow-invalid-boz -fno-range-check -ffree-line-length-none")
 endif()
 
-
+add_subdirectory(src/shared)
 add_subdirectory(src/atmos_param)
 add_subdirectory(src/atmos_shared)
 add_subdirectory(src/atmos_solo)
 add_subdirectory(src/atmos_spectral)
-add_subdirectory(src/shared)
+
+# file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
+# set_target_properties(dycore PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
+
+# target_include_directories(dycore PRIVATE ${CMAKE_BINARY_DIR}/modules)
+
 target_link_libraries(dycore PRIVATE dycore_c)
 install(TARGETS dycore mppnccombine RUNTIME DESTINATION .) 
 install(FILES input/hs_diag_table DESTINATION . RENAME diag_table)
