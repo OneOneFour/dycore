@@ -1,6 +1,6 @@
 # work output paths:
 workdir*/
-exec_*/
+exec*/
 postprocessing/
 exec*/
 exec_spectral.mazama/
@@ -9,6 +9,14 @@ exec_spectral.mazama/
 */.*
 bin/
 include/
+build/
+
+.vscode
+.cppdefs
+._*
+*/.*
+bin/
+
 *.err
 *.out
 data/

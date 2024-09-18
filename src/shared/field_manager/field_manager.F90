@@ -3344,7 +3344,7 @@ character(len=256), parameter :: note_header  = '==>Note from ' // trim(module_n
 !
 integer                            :: count
 integer                            :: error
-character(len=fm_type_name_len)    :: field_type
+character(len=fm_type_name_len)    :: field_type_inner
 logical                            :: found
 integer                            :: index
 integer                            :: n
@@ -3431,7 +3431,7 @@ if (dim .eq. 1) then  !{
     return
   endif  !}
   count = 0
-  do while (fm_loop_over_list(lists(1), name, field_type, index))  !{
+  do while (fm_loop_over_list(lists(1), name, field_type_inner, index))  !{
     count = count + 1
     return_p%names(count) = name
   enddo  !}
@@ -3452,7 +3452,7 @@ endif  !}
 !        occur in all of the other lists. If so, then save the name
 !
 count = 0
-do while (fm_loop_over_list(lists(shortest), name, field_type, index))  !{
+do while (fm_loop_over_list(lists(shortest), name, field_type_inner, index))  !{
   found = .true.
   do n = 1, dim  !{
     if (n .ne. shortest) then   !{

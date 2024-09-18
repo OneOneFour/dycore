@@ -542,7 +542,8 @@ subroutine trans_filter_3d(grid, filter)
 !-------------------------------------------------------------------------
 
 real, intent(inout), dimension (:,:,:) :: grid
-real, intent(in), optional, dimension (:,:) :: filter
+! Had to remove the optional tag here - previous code was slightly non-sensical
+real, intent(in), dimension (:,:) :: filter
 
 complex, dimension (size(filter,1),size(filter,2),size(grid,3)) :: spherical
 integer :: k
@@ -553,11 +554,10 @@ end if
 
 call trans_grid_to_spherical(grid, spherical)
 
-if(present(filter)) then
-  do k=1, size(grid,3)
-    spherical(:,:,k) = spherical(:,:,k)*filter
-  end do
-end if
+do k=1, size(grid,3)
+  spherical(:,:,k) = spherical(:,:,k)*filter
+end do
+
 
 call trans_spherical_to_grid(spherical, grid)
 

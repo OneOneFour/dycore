@@ -1,0 +1,1 @@
+target_sources(dycore PRIVATE atmos_model.f90)
