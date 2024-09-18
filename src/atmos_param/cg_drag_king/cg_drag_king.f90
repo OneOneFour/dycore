@@ -6,12 +6,13 @@ module cg_drag_king_mod
                     close_file, open_namelist_file, &
                     stdlog, write_version_number, &
                     read_data, write_data,   &
-                    open_restart_file
+                    open_restart_file, field_size
     use time_manager_mod,       only:  time_manager_init, time_type
     use diag_manager_mod,       only:  diag_manager_init,   &
                                         register_diag_field, send_data
     use constants_mod,          only:  constants_init, PI, RDGAS, GRAV, CP_AIR, &
                                         SECONDS_PER_DAY
+    use transforms_mod,         only: grid_domain
     implicit none
     private 
 
@@ -132,6 +133,8 @@ module cg_drag_king_mod
                 integer                 :: idf, jdf, kmax
                 real                    :: lat(size(lonb) - 1, size(latb) - 1)
                 real                    :: thislatdeg
+                integer, dimension(4) :: sizbt
+                integer, dimension(4) :: sizcw 
         !-------------------------------------------------------------------    
         !  constants
                 real                    :: pif = 3.14159265358979/180.
@@ -175,7 +178,6 @@ module cg_drag_king_mod
         if (mpp_pe() == mpp_root_pe()) then
             write (logunit, nml=cg_drag_king_nml)
         endif 
-
         kmax = size(pref) -1
         jdf = size(latb) - 1
         idf = size(lonb) - 1
@@ -189,13 +191,15 @@ module cg_drag_king_mod
             if(mpp_pe() == mpp_root_pe()) then
                 call error_mesg('cg_drag_king_mod','Reading NETCDF parameter file: INPUT/cg_drag_king_params.nc',NOTE)
             endif
-            call read_data('INPUT/cg_drag_king_params.nc', data_bt_field, source_amp)
-            call read_data('INPUT/cg_drag_king_params.nc', data_cw_field, half_width)
+            call field_size('INPUT/cg_drag_king_params.nc', data_bt_field, sizbt)
+            call field_size('INPUT/cg_drag_king_params.nc', data_cw_field, sizcw)
+            
+            call read_data('INPUT/cg_drag_king_params.nc', data_bt_field, source_amp,domain=grid_domain)
+            call read_data('INPUT/cg_drag_king_params.nc', data_cw_field, half_width,domain=grid_domain)
         else 
             call error_mesg('cg_drag_king_mod','No NETCDF parameter file found',FATAL)
         endif
 
-    
 
         !! descend from top layer to bottom
         do k=1,kmax
@@ -221,7 +225,6 @@ module cg_drag_king_mod
                 damp_level(i,j) = klevel_of_damp
             enddo
         enddo 
-
         source_level = min(source_level,kmax-1)
         damp_level = min(damp_level,kmax)
 
@@ -614,6 +617,8 @@ module cg_drag_king_mod
                 
                 iz0 = source_level(i+is-1,j+js-1)
                 iztop = damp_level(i+is-1,j+js-1)
+                
+
                 ampl = source_amp(i+is-1,j+js-1)
                 cw = half_width(i+is-1,j+js-1)
                 Bsum = 0.
@@ -673,7 +678,7 @@ module cg_drag_king_mod
 
                                 ! has the wave broken at this level?
                                 Foc = B0(n)/(c0mu(k))**3 - fp0
-                                if ((Foc >= 0.0) .or. (c0mu0(k)*c0mu(k) <= 0.0)) then
+                                if ((Foc >= 0.0) .or. (c0mu0(n)*c0mu(k) <= 0.0)) then
                                     msk(n) = 0
                                     if (k < iz0) then
                                         fm = fm + B0(n)
@@ -718,8 +723,4 @@ module cg_drag_king_mod
             enddo
         enddo 
     end subroutine gwfc
-
-
-
-
 end module cg_drag_king_mod

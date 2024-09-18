@@ -49,6 +49,42 @@
 &fms_nml
     domains_stack_size = 600000 /
 
- &fms_io_nml
+&fms_io_nml
     threading_write = 'single',
     fileset_write = 'single' /
+
+&cg_coupler_nml
+    do_king_cg=.true.,
+    do_ref_cg=.false./
+
+&cg_drag_ref_nml
+    Bt_0  = 0.0043,  
+    Bt_nh = 0.00,
+    Bt_eq = 0.0043,
+    Bt_sh = 0.00,
+    phi0n = 15.,
+    phi0s =-15.,
+    dphin = 10.,
+    dphis =-10.,
+    flag=0,
+    Bw = 0.4,
+    Bn = 0.0,
+    cw = 35.0,
+    cwtropics = 35.0,
+    cn =  2.0,
+    kelvin_kludge = 0.0,
+    weighttop = 0.7,
+    weightminus1 = 0.28,
+    weightminus2 = 0.02,
+    source_level_pressure = 315.e+02,
+    damp_level_pressure = 0.85e+02,
+    cg_drag_freq = 21600 /
+
+&cg_drag_king_nml
+    Bw=0.4,
+    cmax=99.6,
+    nk=1,
+    dc=1.2,
+    source_level_pressure = 315.e+02,
+    damp_level_pressure = 0.85e+02,
+    cg_drag_freq = 21600 /

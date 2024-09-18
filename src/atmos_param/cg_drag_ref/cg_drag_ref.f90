@@ -1,4 +1,4 @@
-module cg_drag_mod
+module cg_drag_ref_mod
 
     use fms_mod,                only:  fms_init, mpp_pe, mpp_root_pe,  &
                                        file_exist, check_nml_error,  &
@@ -16,12 +16,12 @@ module cg_drag_mod
     use constants_mod,          only:  constants_init, PI, RDGAS, GRAV, CP_AIR, &
                                        SECONDS_PER_DAY
     
-    #ifdef COL_DIAG
+#ifdef COL_DIAG
     use column_diagnostics_mod, only:  column_diagnostics_init, &
                                        initialize_diagnostic_columns, &
                                        column_diagnostics_header, &
                                        close_column_diagnostics_units
-    #endif
+#endif
     
     !-------------------------------------------------------------------
     
@@ -29,7 +29,7 @@ module cg_drag_mod
     private
     
     !---------------------------------------------------------------------
-    !    cg_drag_mod computes the convective gravity wave forcing on 
+    !    cg_drag_ref_mod computes the convective gravity wave forcing on 
     !    the zonal flow. the parameterization is described in Alexander and 
     !    Dunkerton [JAS, 15 December 1999]. 
     !--------------------------------------------------------------------
@@ -48,9 +48,9 @@ module cg_drag_mod
     !-------  interfaces --------
     
     !mj removing restart stuff
-    public    cg_drag_init, cg_drag_calc, cg_drag_end, &
-              cg_drag_time_vary, cg_drag_endts
-    !         cg_drag_restart
+    public    cg_drag_ref_init, cg_drag_ref_calc, cg_drag_ref_end, &
+              cg_drag_ref_time_vary, cg_drag_ref_endts
+    !         cg_drag_ref_restart
     
     !!$private   read_restart_file, read_nc_restart_file, &
     !!$          write_restart_file, gwfc
@@ -160,7 +160,7 @@ module cg_drag_mod
                                       ! columns [ degrees, 0. -> 360. ]
     
     
-    namelist / cg_drag_nml /         &
+    namelist / cg_drag_ref_nml /         &
                               cg_drag_freq, cg_drag_offset, &
                               source_level_pressure, damp_level_pressure,   &
                               nk, cmax, dc, Bt_0, Bt_aug,  &
@@ -276,11 +276,11 @@ module cg_drag_mod
     
     !####################################################################
     
-    subroutine cg_drag_init (lonb, latb, pref, Time, axes)
+    subroutine cg_drag_ref_init (lonb, latb, pref, Time, axes)
     
     
     !-------------------------------------------------------------------
-    !   cg_drag_init is the constructor for cg_drag_mod.
+    !   cg_drag_ref_init is the constructor for cg_drag_ref_mod.
     !-------------------------------------------------------------------
     
     !-------------------------------------------------------------------
@@ -344,17 +344,17 @@ module cg_drag_mod
           call time_manager_init
           call diag_manager_init
           call constants_init
-    #ifdef COL_DIAG
+#ifdef COL_DIAG
     !      call column_diagnostics_init 
-    #endif SKIP
+#endif SKIP
     !---------------------------------------------------------------------
     !    read namelist.
     !---------------------------------------------------------------------
           if (file_exist('input.nml')) then
             unit =  open_namelist_file ( )
             ierr=1; do while (ierr /= 0)
-            read (unit, nml=cg_drag_nml, iostat=io, end=10)
-            ierr = check_nml_error (io, 'cg_drag_nml')
+            read (unit, nml=cg_drag_ref_nml, iostat=io, end=10)
+            ierr = check_nml_error (io, 'cg_drag_ref_nml')
             enddo
     10      call close_file (unit)
           endif
@@ -364,7 +364,7 @@ module cg_drag_mod
     !---------------------------------------------------------------------
           call write_version_number (version, tagname)
           logunit = stdlog()
-          if (mpp_pe() == mpp_root_pe()) write (logunit, nml=cg_drag_nml)
+          if (mpp_pe() == mpp_root_pe()) write (logunit, nml=cg_drag_ref_nml)
     
     !-------------------------------------------------------------------
     !  define the grid dimensions. idf and jdf are the (i,j) dimensions of 
@@ -449,10 +449,10 @@ module cg_drag_mod
     !    if column diagnostics are desired, check that array dimensions are
     !    sufficiently large for the number of requests. 
     !---------------------------------------------------------------------
-    #ifdef COL_DIAG
+#ifdef COL_DIAG
           if (column_diagnostics_desired) then
             if (num_diag_pts > MAX_PTS) then
-              call error_mesg ( 'cg_drag_mod', &
+              call error_mesg ( 'cg_drag_ref_mod', &
              ' must reset MAX_PTS or reduce number of diagnostic points', &
                                                          FATAL)
             endif
@@ -480,7 +480,7 @@ module cg_drag_mod
                           lon_coords_gl, lonb, latb, do_column_diagnostics, &
                           diag_lon, diag_lat, diag_i, diag_j, diag_units)
           endif
-    #endif
+#endif
     
     !---------------------------------------------------------------------
     !    define the number of waves in the gravity wave spectrum, and define
@@ -541,7 +541,7 @@ module cg_drag_mod
     !---------------------------------------------------------------------
     !mj we don't do this anymore
     !!$      if (size(restart_versions(:)) .gt. 2 ) then
-    !!$        call cg_drag_register_restart
+    !!$        call cg_drag_ref_register_restart
     !!$      endif
     !!$
     !!$      if (file_exist('INPUT/cg_drag.res.nc')) then
@@ -555,10 +555,10 @@ module cg_drag_mod
     !    the namelist inputs.
     !-------------------------------------------------------------------
     !!$      else
-    !mj check day is multiple of cg_drag_freq (as restart capability has been removed)
+    !mj check day is multiple of cg_drag_ref_freq (as restart capability has been removed)
          if( cg_drag_freq /= 0 ) then
             if( modulo(86400,cg_drag_freq) /= 0 ) then
-               call error_mesg('cg_drag','cg_drag_freq must divide 86400 (full day) or equal 0', FATAL)
+               call error_mesg('cg_drag','cg_drag_ref_freq must divide 86400 (full day) or equal 0', FATAL)
             endif
          endif
          gwd_u(:,:,:) = 0.0
@@ -580,12 +580,12 @@ module cg_drag_mod
     
     
     
-    end subroutine cg_drag_init
+    end subroutine cg_drag_ref_init
     
     
     !####################################################################
      
-    subroutine cg_drag_time_vary (delt)
+    subroutine cg_drag_ref_time_vary (delt)
     
     real           ,        intent(in)      :: delt
     
@@ -596,12 +596,12 @@ module cg_drag_mod
     
     !---------------------------------------------------------------------
      
-    end subroutine cg_drag_time_vary
+    end subroutine cg_drag_ref_time_vary
     
     
     !####################################################################
      
-    subroutine cg_drag_endts
+    subroutine cg_drag_ref_endts
      
     !--------------------------------------------------------------------
     !    if this was a calculation step, reset cgdrag_alarm to indicate 
@@ -612,15 +612,15 @@ module cg_drag_mod
             cgdrag_alarm = cgdrag_alarm + cg_drag_freq
           endif
     
-    end subroutine cg_drag_endts
+    end subroutine cg_drag_ref_endts
     
     
     !####################################################################
     
-    subroutine cg_drag_calc (is, js, lat, pfull, zfull, temp, uuu, vvv,  &
+    subroutine cg_drag_ref_calc (is, js, lat, pfull, zfull, temp, uuu, vvv,  &
                              Time, delt, gwfcng_x, gwfcng_y)
     !--------------------------------------------------------------------  
-    !    cg_drag_calc defines the arrays needed to calculate the convective
+    !    cg_drag_ref_calc defines the arrays needed to calculate the convective
     !    gravity wave forcing, calls gwfc to calculate the forcing, returns 
     !    the desired output fields, and saves the values for later retrieval
     !    if they are not calculated on every timestep.
@@ -681,15 +681,15 @@ module cg_drag_mod
     !    local variables:
     !
     !       dtdz          temperature lapse rate [ deg K/m ]
-    !       ked_gwfc      effective diffusion coefficient from cg_drag_mod 
+    !       ked_gwfc      effective diffusion coefficient from cg_drag_ref_mod 
     !                     [ m^2/s ]
     !       zzchm         heights at model levels [ m ]
     !       zu            zonal velocity [ m/s ]
     !       zden          atmospheric density [ kg/m^3 ]
     !       zbf           buoyancy frequency [ /s ]
-    !       gwd_xtnd      zonal wind tendency resulting from cg_drag_mod 
+    !       gwd_xtnd      zonal wind tendency resulting from cg_drag_ref_mod 
     !                     [ m/s^2 ]
-    !       ked_xtnd      effective diffusion coefficient from cg_drag_mod 
+    !       ked_xtnd      effective diffusion coefficient from cg_drag_ref_mod 
     !                     [ m^2/s ]
     !       source_level  k index of gravity wave source level ((i,j) array)
     !       damp_level    k index of gravity wave mesospheric dumping level ((i,j) array)
@@ -821,7 +821,7 @@ module cg_drag_mod
               gwd_v(is:ie,js:je,:) = gwfcng_y(:,:,:)
     
     
-    #ifdef COL_DIAG
+#ifdef COL_DIAG
     !--------------------------------------------------------------------
     !  if column diagnostics are desired, determine if any columns are on
     !  this processor. if so, call column_diagnostics_header to write
@@ -860,7 +860,7 @@ module cg_drag_mod
                 endif    ! (do_column_diagnostics)
               end do   ! (j loop)
             endif    ! (column_diagnostics_desired)
-    #endif
+#endif
     
     
     !--------------------------------------------------------------------
@@ -908,21 +908,21 @@ module cg_drag_mod
     !--------------------------------------------------------------------
     ! mj now update the alarm clock, for control over how often cg_drag
     !    will recalculate the NOGWD tendencies
-         call cg_drag_endts
-         call cg_drag_time_vary(delt)
+         call cg_drag_ref_endts
+         call cg_drag_ref_time_vary(delt)
          
     
     
-    end subroutine cg_drag_calc
+    end subroutine cg_drag_ref_calc
     
     
     
     !###################################################################
     
-    subroutine cg_drag_end
+    subroutine cg_drag_ref_end
     
     !--------------------------------------------------------------------
-    !    cg_drag_end is the destructor for cg_drag_mod.
+    !    cg_drag_ref_end is the destructor for cg_drag_ref_mod.
     !--------------------------------------------------------------------
     
     !--------------------------------------------------------------------
@@ -931,17 +931,17 @@ module cg_drag_mod
     !For version 3 and after, use NetCDF restarts.
     !mj don't restart anymore
     !!$      if (mpp_pe() == mpp_root_pe() ) &
-    !!$            call error_mesg ('cg_drag_mod', 'write_restart_nc: &
+    !!$            call error_mesg ('cg_drag_ref_mod', 'write_restart_nc: &
     !!$              &Writing netCDF formatted restart file as &
     !!$                &requested. ', NOTE)
-    !!$      call cg_drag_restart
+    !!$      call cg_drag_ref_restart
     
     
-    #ifdef COL_DIAG
+#ifdef COL_DIAG
           if (column_diagnostics_desired) then
             call close_column_diagnostics_units (diag_units)
           endif
-    #endif
+#endif
     
     !---------------------------------------------------------------------
     !    mark the module as uninitialized.
@@ -951,7 +951,7 @@ module cg_drag_mod
     !---------------------------------------------------------------------
     
     
-    end subroutine cg_drag_end
+    end subroutine cg_drag_ref_end
     
     
     
@@ -973,12 +973,12 @@ module cg_drag_mod
     !!$
     !!$!-------------------------------------------------------------------
     !!$!    the root pe writes out the restart version, the time remaining 
-    !!$!    before the next call to cg_drag_mod and the current cg_drag 
+    !!$!    before the next call to cg_drag_ref_mod and the current cg_drag 
     !!$!    timestep.
     !!$!-------------------------------------------------------------------
     !!$      if (mpp_pe() == mpp_root_pe() ) then
     !!$        write (unit) restart_versions(size(restart_versions(:)))
-    !!$        write (unit) cgdrag_alarm, cg_drag_freq
+    !!$        write (unit) cgdrag_alarm, cg_drag_ref_freq
     !!$      endif
     !!$
     !!$!-------------------------------------------------------------------
@@ -1001,7 +1001,7 @@ module cg_drag_mod
     !!$subroutine read_restart_file
     !!$
     !!$!-------------------------------------------------------------------
-    !!$!   read_restart_file reads the cg_drag_mod restart file.
+    !!$!   read_restart_file reads the cg_drag_ref_mod restart file.
     !!$!-------------------------------------------------------------------
     !!$
     !!$!-------------------------------------------------------------------
@@ -1036,7 +1036,7 @@ module cg_drag_mod
     !!$      read (unit) vers
     !!$      if (.not. any(vers == restart_versions) ) then
     !!$        write (chvers, '(i4)') vers
-    !!$        call error_mesg ('cg_drag_init', &
+    !!$        call error_mesg ('cg_drag_ref_init', &
     !!$               'restart version '//chvers//' cannot be read &
     !!$               &by this module version', FATAL)
     !!$      endif
@@ -1056,10 +1056,10 @@ module cg_drag_mod
     !!$!--------------------------------------------------------------------
     !!$        read (unit) dummy           
     !!$        old_time_step = secs_per_day*dummy(4) + dummy(3)
-    !!$        if (cg_drag_offset == 0) then
+    !!$        if (cg_drag_ref_offset == 0) then
     !!$          cgdrag_alarm =  old_time_step
     !!$        else
-    !!$          cgdrag_alarm = cg_drag_offset 
+    !!$          cgdrag_alarm = cg_drag_ref_offset 
     !!$        endif
     !!$      else 
     !!$
@@ -1082,24 +1082,24 @@ module cg_drag_mod
     !!$!    if current cg_drag calling frequency differs from that previously 
     !!$!    used, adjust the time remaining before the next calculation. 
     !!$!--------------------------------------------------------------------
-    !!$      if (cg_drag_freq /= old_time_step) then
-    !!$        cgdrag_alarm = cgdrag_alarm - old_time_step + cg_drag_freq
+    !!$      if (cg_drag_ref_freq /= old_time_step) then
+    !!$        cgdrag_alarm = cgdrag_alarm - old_time_step + cg_drag_ref_freq
     !!$        if (mpp_pe() == mpp_root_pe() ) then
-    !!$          call error_mesg ('cg_drag_mod',   &
+    !!$          call error_mesg ('cg_drag_ref_mod',   &
     !!$                'cgdrag time step has changed, &
     !!$                &next cgdrag time also changed', NOTE)
     !!$        endif
     !!$      endif
     !!$
     !!$!--------------------------------------------------------------------
-    !!$!    if cg_drag_offset is specified and is smaller than the time remain-
+    !!$!    if cg_drag_ref_offset is specified and is smaller than the time remain-
     !!$!    ing until the next calculation, modify the time remaining to be 
     !!$!    that offset time. the assumption is made that the restart was
     !!$!    written at 00Z.
     !!$!--------------------------------------------------------------------
-    !!$      if (cg_drag_offset /= 0) then
-    !!$        if (cgdrag_alarm > cg_drag_offset) then
-    !!$          cgdrag_alarm = cg_drag_offset
+    !!$      if (cg_drag_ref_offset /= 0) then
+    !!$        if (cgdrag_alarm > cg_drag_ref_offset) then
+    !!$          cgdrag_alarm = cg_drag_ref_offset
     !!$        endif
     !!$      endif
     !!$
@@ -1134,7 +1134,7 @@ module cg_drag_mod
     !!$!    output a message indicating entrance into this routine.
     !!$!--------------------------------------------------------------------
     !!$      if (mpp_pe() == mpp_root_pe() ) then
-    !!$        call error_mesg ('cg_drag_mod',  'read_restart_nc:&
+    !!$        call error_mesg ('cg_drag_ref_mod',  'read_restart_nc:&
     !!$             &Reading netCDF formatted restart file:'//trim(fname), NOTE)
     !!$      endif
     !!$
@@ -1142,14 +1142,14 @@ module cg_drag_mod
     !!$!    read the values of gwd_u and gwd_v
     !!$!-------------------------------------------------------------------
     !!$      if (size(restart_versions(:)) .le. 2 ) then
-    !!$         call error_mesg ('cg_drag_mod',  'read_restart_nc: restart file format is netcdf, ' // &
+    !!$         call error_mesg ('cg_drag_ref_mod',  'read_restart_nc: restart file format is netcdf, ' // &
     !!$              'restart_versions is not netcdf file version', FATAL)
     !!$      endif
     !!$      call restore_state(Cg_restart)
     !!$      if(in_different_file) call restore_state(Til_restart)
     !!$      if (.not. any(vers == restart_versions) ) then
     !!$        write (chvers, '(i4)') vers
-    !!$        call error_mesg ('cg_drag_init', &
+    !!$        call error_mesg ('cg_drag_ref_init', &
     !!$               'restart version '//chvers//' cannot be read &
     !!$               &by this module version', FATAL)
     !!$      endif
@@ -1159,25 +1159,25 @@ module cg_drag_mod
     !!$!    if current cg_drag calling frequency differs from that previously 
     !!$!    used, adjust the time remaining before the next calculation. 
     !!$!--------------------------------------------------------------------
-    !!$      if (cg_drag_freq /= old_time_step) then
-    !!$        cgdrag_alarm = cgdrag_alarm - old_time_step + cg_drag_freq
+    !!$      if (cg_drag_ref_freq /= old_time_step) then
+    !!$        cgdrag_alarm = cgdrag_alarm - old_time_step + cg_drag_ref_freq
     !!$        if (mpp_pe() == mpp_root_pe() ) then
-    !!$          call error_mesg ('cg_drag_mod',   &
+    !!$          call error_mesg ('cg_drag_ref_mod',   &
     !!$                'cgdrag time step has changed, &
     !!$                &next cgdrag time also changed', NOTE)
     !!$        endif
-    !!$        old_time_step = cg_drag_freq
+    !!$        old_time_step = cg_drag_ref_freq
     !!$      endif
     !!$
     !!$!--------------------------------------------------------------------
-    !!$!    if cg_drag_offset is specified and is smaller than the time remain-
+    !!$!    if cg_drag_ref_offset is specified and is smaller than the time remain-
     !!$!    ing until the next calculation, modify the time remaining to be 
     !!$!    that offset time. the assumption is made that the restart was
     !!$!    written at 00Z.
     !!$!--------------------------------------------------------------------
-    !!$      if (cg_drag_offset /= 0) then
-    !!$        if (cgdrag_alarm > cg_drag_offset) then
-    !!$          cgdrag_alarm = cg_drag_offset
+    !!$      if (cg_drag_ref_offset /= 0) then
+    !!$        if (cgdrag_alarm > cg_drag_ref_offset) then
+    !!$          cgdrag_alarm = cg_drag_ref_offset
     !!$        endif
     !!$      endif
     !!$
@@ -1186,7 +1186,7 @@ module cg_drag_mod
     !!$
     !!$!####################################################################
     !!$! register restart field to be read and written through save_restart and restore_state.
-    !!$subroutine cg_drag_register_restart
+    !!$subroutine cg_drag_ref_register_restart
     !!$
     !!$  character(len=64) :: fname = 'cg_drag.res.nc'    ! name of restart file
     !!$  character(len=64) :: fname2 
@@ -1204,16 +1204,16 @@ module cg_drag_mod
     !!$
     !!$  id_restart = register_restart_field(Cg_restart, fname, 'restart_version', vers)
     !!$  id_restart = register_restart_field(Cg_restart, fname, 'cgdrag_alarm', cgdrag_alarm)
-    !!$  id_restart = register_restart_field(Cg_restart, fname, 'cg_drag_freq', old_time_step)
+    !!$  id_restart = register_restart_field(Cg_restart, fname, 'cg_drag_ref_freq', old_time_step)
     !!$  id_restart = register_restart_field(Til_restart, fname, 'gwd_u', gwd_u)
     !!$  id_restart = register_restart_field(Til_restart, fname, 'gwd_v', gwd_v)
     !!$
     !!$  return
     !!$
-    !!$end subroutine cg_drag_register_restart
+    !!$end subroutine cg_drag_ref_register_restart
     !!$
     !!$!####################################################################
-    !!$! <SUBROUTINE NAME="cg_drag_restart">
+    !!$! <SUBROUTINE NAME="cg_drag_ref_restart">
     !!$!
     !!$! <DESCRIPTION>
     !!$! write out restart file.
@@ -1223,14 +1223,14 @@ module cg_drag_mod
     !!$!                                      the any restart file name as a prefix. 
     !!$! </DESCRIPTION>
     !!$!
-    !!$subroutine cg_drag_restart(timestamp)
+    !!$subroutine cg_drag_ref_restart(timestamp)
     !!$  character(len=*), intent(in), optional :: timestamp
     !!$
     !!$  call save_restart(Cg_restart, timestamp)
     !!$  if(in_different_file) call save_restart(Til_restart, timestamp)
     !!$
-    !!$end subroutine cg_drag_restart
-    !!$! </SUBROUTINE> NAME=cg_drag_restart"
+    !!$end subroutine cg_drag_ref_restart
+    !!$! </SUBROUTINE> NAME=cg_drag_ref_restart"
     !!$
     
     !####################################################################
@@ -1412,7 +1412,7 @@ module cg_drag_mod
     !      stress to a flux.
     !---------------------------------------------------------------------
               if (Bsum == 0.0) then
-                call error_mesg ('cg_drag_mod', &
+                call error_mesg ('cg_drag_ref_mod', &
                    ' zero flux input at source level', FATAL)
               endif
               !epg: eps = (ampl*1.5/nk)/Bsum
@@ -1534,7 +1534,7 @@ module cg_drag_mod
                     
                     !epg: enforce momentum conservation at model top; in this case, all the momentum 
                     !     deposited in the uppermost layer (which exist above the top model level,
-                    !     as explained in cg_drag_calc,  must be added to the level below, which is
+                    !     as explained in cg_drag_ref_calc,  must be added to the level below, which is
                     !     the actual top level of the model.
             !cig: place the extra momentum flux in the top 3 layers instead of all in the top layer
                     if ( k==0 ) then
@@ -1608,7 +1608,7 @@ module cg_drag_mod
     !####################################################################
     
     
-    end module cg_drag_mod
+    end module cg_drag_ref_mod
     
     
     
