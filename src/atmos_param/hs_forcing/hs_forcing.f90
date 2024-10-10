@@ -414,7 +414,7 @@ real, intent(in),  dimension(:,:,:), optional :: mask
          p_norm(:,:) = p_full(:,:,k)/pref
          the   (:,:) = t_star(:,:) - delv*cos_lat_2(:,:)*log(p_norm(:,:))
          teq(:,:,k) = the(:,:)*(p_norm(:,:))**KAPPA
-!         teq(:,:,k) = max( teq(:,:,k), tstr(:,:) )
+         teq(:,:,k) = max( teq(:,:,k), tstr(:,:) )
 
 ! Take horz average - assume variations in are small compared to vert
 
