@@ -56,7 +56,7 @@ module hs_forcing_mod
 
 !-----------------------------------------------------------------------
 
-use     constants_mod, only: KAPPA, CP_AIR, GRAV
+use     constants_mod, only: KAPPA, CP_AIR, GRAV,PI,RADIAN
 
 use           fms_mod, only: error_mesg, FATAL, file_exist,       &
                              open_namelist_file, check_nml_error, &
@@ -390,13 +390,13 @@ real, intent(in),  dimension(:,:,:), optional :: mask
 !print*,time_in_days
         if(time_in_days>1) then
         !print*,'cycle ',time_in_days
-        As=max(0.0, sin(2*3.1416*(time_in_days-180.)/360.))
-        An=max(0.0, sin(2*3.1416*time_in_days/360.))
-        w(:,:) = 0.5 * (As*(1-tanh((lat(:,:)+50*3.1416/180)/(10*3.1416/180)))   &
-                       +An*(1+tanh((lat(:,:)-50*3.1416/180)/(10*3.1416/180))))
-        else
+         As=max(0.0, sin(2*PI*(time_in_days-180.)/360.))
+         An=max(0.0, sin(2*PI*time_in_days/360.))
+         w(:,:) = 0.5 * (As*(1-tanh((lat(:,:)+50/RADIAN)/(10/RADIAN)))   &
+                        +An*(1+tanh((lat(:,:)-50/RADIAN)/(10/RADIAN))))
+         else
 
-        w(:,:) = 0.5 * (1-tanh((lat(:,:)+50*3.1416/180)/(10*3.1416/180)))
+        w(:,:) = 0.5 * (1-tanh((lat(:,:)+50/RADIAN)/(10/RADIAN)))
         end if
 ! lat weght coef = .5 for strat used by Polvani and Kushner (2002)
 ! 
@@ -428,39 +428,39 @@ p=sum(p_sum)/(size(t,2)*size(t,1))
 !enddo
 !      p=p_sum/(size(t,2)*size(t,1))
 
-               IF (p > h1) THEN
-                  teq(:,:,k) = max(teq(:,:,k), tstr(:,:))
-               ELSE IF (p < h1 .AND. p > h2) THEN   
-                  t_us(:,:,k)=288. * 0.751865
-                  teq(:,:,k)=(1-w(:,:))*t_us(:,:,k)+w(:,:)* &
-                  t_us_tp*(p_full(:,:,k)/P_T)**(R*gamma/g)
+!                IF (p > h1) THEN
+!                   teq(:,:,k) = max(teq(:,:,k), tstr(:,:))
+!                ELSE IF (p < h1 .AND. p > h2) THEN   
+!                   t_us(:,:,k)=288. * 0.751865
+!                   teq(:,:,k)=(1-w(:,:))*t_us(:,:,k)+w(:,:)* &
+!                   t_us_tp*(p_full(:,:,k)/P_T)**(R*gamma/g)
 
-               ELSE IF (p < h2 .AND. p > h3) THEN 
-                  z = (exp(-log(p)/34.16319)-0.988626)*198903
-                  t_us(:,:,k)=288*(0.682457 + z/288136)
-                  teq(:,:,k)=(1-w(:,:))*t_us(:,:,k)+w(:,:)* & 
-                  t_us_tp*(p_full(:,:,k)/P_T)**(R*gamma/g)
+!                ELSE IF (p < h2 .AND. p > h3) THEN 
+!                   z = (exp(-log(p)/34.16319)-0.988626)*198903
+!                   t_us(:,:,k)=288*(0.682457 + z/288136)
+!                   teq(:,:,k)=(1-w(:,:))*t_us(:,:,k)+w(:,:)* & 
+!                   t_us_tp*(p_full(:,:,k)/P_T)**(R*gamma/g)
 
-               ELSE IF (p < h3 .AND. p > h4) THEN 
-                  z=(exp(-log(p)/12.20114)-0.898309)*55280
-                  t_us(:,:,k)=288*(0.482561 + z/102906)
-                  teq(:,:,k)=(1-w(:,:))*t_us(:,:,k)+w(:,:)* &
-                  t_us_tp*(p_full(:,:,k)/P_T)**(R*gamma/g)
+!                ELSE IF (p < h3 .AND. p > h4) THEN 
+!                   z=(exp(-log(p)/12.20114)-0.898309)*55280
+!                   t_us(:,:,k)=288*(0.482561 + z/102906)
+!                   teq(:,:,k)=(1-w(:,:))*t_us(:,:,k)+w(:,:)* &
+!                   t_us_tp*(p_full(:,:,k)/P_T)**(R*gamma/g)
 
-               ELSE IF (p < h4 .AND. p > h5) THEN 
-!                  z=-((log(p/0.00109456)*7922)-46998)
-                  t_us(:,:,k)=288*0.939268
-                  teq(:,:,k)=(1-w(:,:))*t_us(:,:,k)+w(:,:)* &
-                  t_us_tp*(p_full(:,:,k)/P_T)**(R*gamma/g)
+!                ELSE IF (p < h4 .AND. p > h5) THEN 
+! !                  z=-((log(p/0.00109456)*7922)-46998)
+!                   t_us(:,:,k)=288*0.939268
+!                   teq(:,:,k)=(1-w(:,:))*t_us(:,:,k)+w(:,:)* &
+!                   t_us_tp*(p_full(:,:,k)/P_T)**(R*gamma/g)
          
-               ELSE
-!                  teq(:,:,k)=tstr(:,:)
-!                  PRINT *, teq(:,:,k)
-                  z=-((exp(log(p)/12.20114)-0.838263)*176142)
-                 t_us(:,:,k)=288*(1.434843 - z / 102906)
-                  teq(:,:,k)=(1-w(:,:))*t_us(:,:,k)+w(:,:)* &
-                  t_us_tp*(p_full(:,:,k)/P_T)**(R*gamma/g)
-      END IF
+!                ELSE
+! !                  teq(:,:,k)=tstr(:,:)
+! !                  PRINT *, teq(:,:,k)
+!                   z=-((exp(log(p)/12.20114)-0.838263)*176142)
+!                  t_us(:,:,k)=288*(1.434843 - z / 102906)
+!                   teq(:,:,k)=(1-w(:,:))*t_us(:,:,k)+w(:,:)* &
+!                   t_us_tp*(p_full(:,:,k)/P_T)**(R*gamma/g)
+!       END IF
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
