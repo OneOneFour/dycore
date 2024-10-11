@@ -382,7 +382,7 @@ real, intent(in),  dimension(:,:,:), optional :: mask
       cos_lat_2(:,:) = 1.0-sin_lat_2(:,:)
       cos_lat_4(:,:) = cos_lat_2(:,:)*cos_lat_2(:,:)
 
-      t_star(:,:) = t_zero - delh*sin_lat_2(:,:) - eps*sin_lat(:,:)
+      t_star(:,:) = t_zero - delh*sin_lat_2(:,:) 
       tstr  (:,:) = t_us_tp
 
         call get_time(Time, seconds, days)
